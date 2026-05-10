@@ -527,7 +527,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       </div>
       <div class="modal-body">
         <label>Client Name</label>
-        <input id="modalClientName" type="text" placeholder="e.g. Emirates NBD">
+        <input id="modalClientName" type="text" placeholder="e.g. Acme Corp">
         <div class="modal-section-title">Historical Estimates</div>
         <p style="color:var(--muted);font-size:12px;margin-bottom:10px">Upload this client's historical estimate Excel file to improve AI accuracy. Each sheet = one project.</p>
         <div class="drop-zone small" id="clientExcelZone" onclick="pickClientExcel()">
@@ -1023,8 +1023,8 @@ function getSelectedClientName(){
 }
 function getClientRates(clientName){
   const c=_allClients.find(x=>x.name===clientName);
-  if(c&&c.rates&&Object.keys(c.rates).length>0)return c.rates;
-  return DEFAULT_RATES;
+  if(c&&c.rates)return c.rates;
+  return {};
 }
 function onClientChange(){
   const sel=document.getElementById('clientName');
@@ -1048,13 +1048,10 @@ function loadClientsIntoSelector(){
   if(!sel)return;
   sel.innerHTML='';
   if(!_allClients.length){
-    // seed Emirates NBD default
-    const seed={id:'emirates_nbd',name:'Emirates NBD',rates:Object.assign({},DEFAULT_RATES),historyProjects:[],createdAt:new Date().toISOString()};
-    _allClients=[seed];saveClientsToStorage(_allClients);
+    const o=document.createElement('option');o.value='';o.textContent='No clients — add one in the Clients tab';
+    sel.appendChild(o);return;
   }
   _allClients.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;sel.appendChild(o)});
-  const enbd=_allClients.find(c=>c.name==='Emirates NBD');
-  if(enbd)sel.value=enbd.id;
   onClientChange();
 }
 
@@ -1391,14 +1388,14 @@ function openEditClient(id){
     document.getElementById('clientExcelPill').style.display='none';
     document.getElementById('clientExcelZone').style.display='';
   }
-  buildRateGrid(c.rates||DEFAULT_RATES);
+  buildRateGrid(c.rates||{});
   document.getElementById('clientModal').style.display='flex';
 }
 function closeClientModal(){document.getElementById('clientModal').style.display='none'}
 function buildRateGrid(rates){
   const grid=document.getElementById('modalRateGrid');grid.innerHTML='';
   Object.entries(RATE_LABELS).forEach(([key,label])=>{
-    const val=rates[key]!==undefined?rates[key]:(DEFAULT_RATES[key]||0);
+    const val=rates[key]!==undefined?rates[key]:0;
     const item=document.createElement('div');item.className='rate-item';item.dataset.rateKey=key;
     item.innerHTML=`<label>${label}</label><input type="number" min="0" data-key="${key}" value="${val}">`;
     grid.appendChild(item);
