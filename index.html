@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estimix — AI Estimate Builder | Nebulix</title>
+<meta name="description" content="Generate creative agency estimates instantly with AI. Estimix by Nebulix uses local AI to produce itemised estimates from your project brief.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#7C3AED">
+<meta name="google-adsense-account" content="ca-pub-7384833188153383">
+<link rel="canonical" href="https://estimix.nebulixcloud.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7384833188153383" crossorigin="anonymous"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root {
+  --bg:#f4f3f0; --surface:#fff; --card:#fff; --border:#e4e2dc; --border2:#ccc9c0;
+  --black:#0e0e0e; --dark:#1a1a1a; --text:#1a1a1a; --muted:#7a7870; --muted2:#b0ada6;
+  --accent:#7C3AED; --accent-dk:#6d28d9; --accent-lt:#ede9fe;
+  --success:#059669; --danger:#DC2626;
+  --sidebar-w:224px; --radius:10px;
+  --font:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+body.dark {
+  --bg:#141414; --surface:#1e1e1e; --card:#1e1e1e; --border:#2c2c2c; --border2:#383838;
+  --black:#f0ede8; --dark:#e0ddd8; --text:#e0ddd8; --muted:#686866; --muted2:#404040;
+  --success:#10b981; --danger:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0 0;z-index:10}
+.content{margin-left:var(--sidebar-w);height:100vh;overflow-y:auto;padding:36px 36px 80px}
+.logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-name{font-size:17px;font-weight:800;color:var(--black);letter-spacing:-0.4px;line-height:1.1;display:block}
+.logo-name small{display:block;font-size:10px;color:var(--muted);font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.logo-badge{display:inline-flex;align-items:center;margin-top:9px;padding:3px 9px;border:1px solid #c4b5fd;border-radius:20px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent);text-decoration:none;background:var(--accent-lt);transition:border-color .15s}
+body.dark .logo-badge{background:rgba(124,58,237,.12)}
+.logo-badge:hover{border-color:var(--accent)}
+.nav-items{flex:1;padding:0 10px}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:500;padding:9px 13px;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s,color .15s;margin-bottom:2px}
+.nav-btn:hover{background:var(--bg);color:var(--dark)}
+.nav-btn.active{background:var(--bg);color:var(--accent)!important;font-weight:600}
+.nav-btn.active .nav-icon{opacity:1}
+.nav-icon{font-size:12px;width:16px;text-align:center;opacity:.5}
+.theme-toggle{display:flex;align-items:center;gap:8px;padding:11px 20px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:color .2s;user-select:none;border-top:1px solid var(--border)}
+.theme-toggle:hover{color:var(--accent)}
+.theme-icon{font-size:14px;line-height:1}
+.ollama-status{display:flex;align-items:center;gap:8px;padding:11px 20px 16px;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.2px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);flex-shrink:0;transition:background .3s}
+.status-dot.online{background:var(--accent)!important;box-shadow:0 0 0 3px rgba(124,58,237,.2)}
+.status-dot.offline{background:var(--danger)}
+/* usage banner */
+.usage-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--accent-lt);border:1px solid #c4b5fd;border-radius:8px;margin-bottom:20px;font-size:13px}
+body.dark .usage-banner{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.3)}
+.usage-banner-text{color:var(--dark);font-weight:500}
+.usage-banner-text strong{color:var(--accent)}
+.usage-banner-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-family:var(--font);font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.usage-banner-btn:hover{background:var(--accent-dk)}
+/* pages */
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:26px}
+.page-header h1{font-size:30px;font-weight:800;color:var(--black);letter-spacing:-1px;margin-bottom:5px;line-height:1.1}
+.page-header p{color:var(--muted);font-size:13px}
+/* mode switcher */
+.mode-switcher{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.mode-btn{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 16px;cursor:pointer;text-align:left;transition:border-color .2s,background .2s;color:var(--text);font-family:var(--font)}
+.mode-btn:hover{border-color:var(--accent)}
+.mode-btn.active{border-color:var(--accent);background:var(--accent)}
+.mode-btn.active strong,.mode-btn.active small{color:#fff!important}
+.mode-btn .mode-icon{font-size:20px;flex-shrink:0}
+.mode-btn strong{display:block;font-size:13px;font-weight:700;color:var(--black);margin-bottom:2px}
+.mode-btn small{display:block;font-size:11px;color:var(--muted)}
+/* layout */
+.two-col{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.form-col{display:flex;flex-direction:column;gap:14px}
+.preview-col{position:sticky;top:0}
+/* card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+.card-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.card-title::before{content:'';width:14px;height:2px;background:var(--accent);flex-shrink:0}
+.card-sub{color:var(--muted2);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px}
+/* form */
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+input,textarea,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text);font-family:var(--font);font-size:13px;font-weight:400;outline:none;transition:border-color .2s,box-shadow .2s,background .2s;margin-bottom:14px;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(124,58,237,.12)!important;background:var(--surface)}
+textarea{resize:vertical;min-height:100px;line-height:1.5}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7870'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:32px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* tabs */
+.brief-tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--bg);border-radius:8px;padding:3px}
+.tab-btn{flex:1;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:500;padding:7px 10px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
+.tab-btn.active{background:var(--surface);color:var(--accent)!important;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+/* drop zone */
+.drop-zone{border:1.5px dashed var(--border2);border-radius:9px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:10px}
+.drop-zone:hover{border-color:var(--accent);background:rgba(124,58,237,.03)}
+.drop-zone.small{padding:16px}
+.drop-icon{font-size:22px;margin-bottom:8px}
+.drop-label{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:4px}
+.drop-sub{font-size:11px;color:var(--muted)}
+/* file pill */
+.file-pill{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text);margin-bottom:6px}
+.file-pill span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-pill button{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;margin:0;width:auto;transition:color .2s}
+.file-pill button:hover{color:var(--danger)}
+.pill-badge{background:rgba(14,14,14,.07);color:var(--dark);font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;white-space:nowrap}
+/* voice */
+.voice-area{display:flex;flex-direction:column;align-items:center;padding:20px 0 10px;gap:12px}
+.record-btn{width:80px;height:80px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);color:var(--dark);font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s;font-family:var(--font)}
+.record-btn:hover{border-color:var(--danger)}
+.record-btn.recording{border-color:var(--danger);background:rgba(220,38,38,.06);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.2)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
+.rec-icon{font-size:22px}
+.rec-timer{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--danger)}
+.rec-status{font-size:12px;color:var(--muted);text-align:center}
+.transcribed{margin-top:12px}
+.transcribed-label{font-size:10px;color:var(--black);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-weight:700}
+/* generate btn */
+.gen-btn{width:100%;background:var(--accent)!important;border:none;border-radius:9px;color:#fff!important;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,transform .1s}
+.gen-btn:hover{background:var(--accent-dk)!important;transform:translateY(-1px)}
+.gen-btn:active{transform:translateY(0)}
+.gen-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* error */
+.err-box{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--danger)}
+/* preview */
+.preview-empty{background:var(--surface);border:1.5px dashed var(--border2);border-radius:var(--radius);padding:48px 24px;text-align:center}
+.preview-empty-icon{font-size:26px;color:var(--muted2);margin-bottom:12px}
+.preview-empty-title{font-size:14px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.preview-empty-sub{font-size:12px;color:var(--muted2);line-height:1.6}
+.preview-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.preview-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--accent)!important}
+.preview-proj{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
+.preview-meta{font-size:11px;color:rgba(255,255,255,.6)}
+.preview-total-box{text-align:right;flex-shrink:0}
+.preview-total-label{font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.preview-total{font-size:18px;font-weight:800;color:#fff}
+.preview-table-wrap{max-height:300px;overflow-y:auto}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px}
+.preview-table th{text-align:left;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface)}
+.preview-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text)}
+.preview-table td:last-child{text-align:right;font-weight:600;color:var(--dark);white-space:nowrap}
+.preview-table .scope-td{color:var(--muted);font-size:11px;font-style:italic}
+.cost-th{text-align:right!important}
+.preview-totals{padding:12px 20px;border-top:1px solid var(--border);background:var(--bg)}
+.tot-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:3px 0}
+.tot-row.grand{color:var(--accent)!important;font-weight:800;font-size:14px;border-top:1px solid var(--border2);margin-top:7px;padding-top:8px}
+.preview-actions{padding:14px 20px;display:flex;gap:10px;border-top:1px solid var(--border);background:var(--surface)}
+.dl-btn{flex:1;background:var(--accent)!important;border:none;border-radius:8px;color:#fff!important;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:12px;cursor:pointer;transition:background .2s}
+.dl-btn:hover{background:var(--accent-dk)!important}
+.secondary-btn{background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:500;padding:12px 16px;cursor:pointer;transition:border-color .2s,color .2s}
+.secondary-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* sanity */
+.sanity-issues{margin:0 20px;padding:12px 16px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);border-radius:8px}
+.sanity-title{font-size:11px;font-weight:700;color:var(--accent-dk);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.sanity-issue-item{font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px solid rgba(124,58,237,.1);line-height:1.5}
+.sanity-issue-item:last-child{border-bottom:none}
+.sanity-issue-item strong{color:var(--dark)}
+/* history */
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:16px;transition:border-color .2s,box-shadow .2s}
+.history-card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(124,58,237,.1)}
+.history-icon{font-size:18px;color:var(--muted2);flex-shrink:0}
+.history-info{flex:1;min-width:0}
+.history-name{font-size:13px;font-weight:700;color:var(--black);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-meta{font-size:11px;color:var(--muted)}
+.history-amount{font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
+.history-del{background:none;border:none;color:var(--muted2);font-size:15px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:color .2s,background .2s}
+.history-del:hover{color:var(--danger);background:rgba(220,38,38,.08)}
+/* empty */
+.empty-state{text-align:center;padding:60px 24px;color:var(--muted);font-size:14px}
+.empty-icon{font-size:32px;margin-bottom:12px;color:var(--muted2)}
+/* settings */
+.test-btn{background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--dark);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;transition:border-color .2s,background .2s;margin-top:4px}
+.test-btn:hover{border-color:var(--accent);background:var(--surface)}
+.test-result{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:12px}
+.test-result.ok{background:rgba(5,150,105,.07);border:1px solid rgba(5,150,105,.2);color:var(--success)}
+.test-result.fail{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--danger)}
+/* manual picker */
+.del-col-hdr{display:grid;grid-template-columns:200px 1fr 80px 28px;gap:8px;padding:0 12px;margin-bottom:6px}
+.del-col-hdr span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.del-list{display:flex;flex-direction:column;gap:7px}
+.del-row{display:grid;grid-template-columns:200px 1fr 80px 28px;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;animation:slideIn .18s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.del-row select{margin:0;padding:6px 26px 6px 8px;font-size:12px;border-radius:6px;background-color:var(--surface)}
+.del-row .del-desc{margin:0;background:transparent;border:none;padding:4px 2px;font-size:12px;color:var(--muted);font-family:var(--font)}
+.del-row .del-desc:focus{box-shadow:none;border:none;outline:none;background:transparent}
+.del-row .del-cost{margin:0;text-align:right;font-size:13px;font-weight:700;color:var(--dark);padding:5px 8px;border-radius:6px;width:80px;background:var(--surface)}
+.del-row .del-x{background:none;border:none;color:var(--muted2);font-size:16px;cursor:pointer;padding:2px 4px;border-radius:5px;line-height:1;transition:color .15s,background .15s}
+.del-row .del-x:hover{color:var(--danger);background:rgba(220,38,38,.08)}
+.add-del-btn{background:none;border:1.5px dashed var(--border2);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;width:100%;text-align:left;transition:border-color .2s,color .2s;margin-top:8px}
+.add-del-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hidden{display:none!important}
+/* progress overlay */
+.gen-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
+.gen-overlay.show{display:flex}
+.gen-overlay-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 48px;text-align:center;min-width:320px;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.gen-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+.gen-overlay-title{font-size:16px;font-weight:700;color:var(--black);margin-bottom:8px}
+.gen-overlay-step{font-size:13px;color:var(--muted);margin-bottom:20px;min-height:20px}
+.gen-progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.gen-progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .4s ease}
+/* clients */
+.add-client-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);border:none;border-radius:9px;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;padding:12px 20px;cursor:pointer;margin-bottom:20px;transition:background .2s}
+.add-client-btn:hover{background:var(--accent-dk)}
+.clients-list{display:flex;flex-direction:column;gap:12px}
+.client-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;display:flex;align-items:center;gap:16px;transition:border-color .2s,box-shadow .2s}
+.client-card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(124,58,237,.08)}
+.client-icon{width:42px;height:42px;border-radius:10px;background:rgba(124,58,237,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.client-info{flex:1;min-width:0}
+.client-name{font-size:14px;font-weight:700;color:var(--black);margin-bottom:3px}
+.client-meta{font-size:12px;color:var(--muted)}
+.client-actions{display:flex;gap:8px;flex-shrink:0}
+.client-edit-btn,.client-del-btn{background:var(--bg);border:1px solid var(--border);border-radius:7px;font-family:var(--font);font-size:12px;padding:7px 14px;cursor:pointer;transition:border-color .2s,color .2s;color:var(--muted);font-weight:500}
+.client-edit-btn:hover{border-color:var(--accent);color:var(--accent)}
+.client-del-btn:hover{border-color:var(--danger);color:var(--danger)}
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-size:16px;font-weight:800;color:var(--black)}
+.modal-close{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:2px 8px;border-radius:6px;line-height:1;transition:color .2s}
+.modal-close:hover{color:var(--danger)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-section-title{font-size:11px;font-weight:700;color:var(--black);text-transform:uppercase;letter-spacing:1.5px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0}
+.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rate-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;gap:10px}
+.rate-item label{font-size:11px;color:var(--dark);font-weight:500;text-transform:none;letter-spacing:0;margin:0;flex:1;line-height:1.3}
+.rate-item input[type=number]{width:70px;text-align:right;margin:0;font-size:13px;font-weight:600;color:var(--accent);padding:5px 8px;border-radius:6px;flex-shrink:0}
+/* attach/voice */
+.attach-section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;margin-top:4px}
+.attach-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted2);font-size:12px}
+.attach-divider::before,.attach-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.attach-divider span{white-space:nowrap;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+/* paywall */
+.pw-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px}
+.pw-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.25)}
+.pw-header{background:linear-gradient(135deg,#7C3AED,#6d28d9);padding:32px 32px 28px;text-align:center}
+.pw-icon{font-size:32px;margin-bottom:12px}
+.pw-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+.pw-subtitle{font-size:14px;color:rgba(255,255,255,.75);line-height:1.4}
+.pw-body{padding:24px 32px 28px}
+.pw-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.pw-plan{border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .2s,background .2s;text-align:center}
+.pw-plan:hover{border-color:var(--accent)}
+.pw-plan.active{border-color:var(--accent);background:rgba(124,58,237,.06)}
+.pw-plan-name{font-size:14px;font-weight:700;color:var(--black);margin-bottom:4px}
+.pw-plan-price{font-size:20px;font-weight:900;color:var(--accent);margin-bottom:4px;font-family:var(--mono)}
+.pw-plan-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.pw-email-row{display:flex;gap:8px;margin-bottom:10px}
+.pw-email-row input{margin:0;flex:1}
+.btn-pw-pay{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.btn-pw-pay:hover{background:var(--accent-dk)}
+.pw-msg{font-size:12px;color:var(--muted);text-align:center;min-height:18px;margin-top:8px}
+.pw-divider{display:flex;align-items:center;gap:10px;margin:18px 0 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.pw-divider::before,.pw-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+#keyMsg{font-size:12px;margin-top:8px;text-align:center;min-height:18px}
+/* footer */
+.app-footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:600}
+.app-footer a{color:var(--accent);text-decoration:none}
+.app-footer a:hover{text-decoration:underline}
+.footer-sep{color:var(--border2);margin:0 3px}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo">
+    <span class="logo-name">Estimix<small>Estimate Builder</small></span>
+    <a href="https://nebulixcloud.com" target="_blank" rel="noopener" class="logo-badge">by Nebulix</a>
+  </div>
+  <div class="nav-items">
+    <button class="nav-btn active" data-page="new"><span class="nav-icon">✦</span> New Estimate</button>
+    <button class="nav-btn" data-page="history"><span class="nav-icon">◎</span> History</button>
+    <button class="nav-btn" data-page="clients"><span class="nav-icon">👥</span> Clients</button>
+    <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙</span> Settings</button>
+  </div>
+  <div class="theme-toggle" onclick="toggleTheme()">
+    <span class="theme-icon" id="themeIcon">☀︎</span>
+    <span id="themeLabel">Light mode</span>
+  </div>
+  <div class="ollama-status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Checking…</span>
+  </div>
+</nav>
+
+<main class="content">
+
+  <!-- usage banner -->
+  <div class="usage-banner" id="usageBanner" style="display:none">
+    <span class="usage-banner-text"><strong id="bannerUses">3</strong> free estimates remaining</span>
+    <button class="usage-banner-btn" onclick="showPaywall()">Upgrade</button>
+  </div>
+
+  <!-- NEW ESTIMATE PAGE -->
+  <div class="page active" id="page-new">
+    <div class="page-header">
+      <h1>New Estimate</h1>
+      <p>Use AI to generate from a brief, or pick deliverables manually.</p>
+    </div>
+
+    <div class="mode-switcher">
+      <button class="mode-btn active" id="modeAI" onclick="switchMode('ai')">
+        <span class="mode-icon">🤖</span>
+        <div><strong>AI Generate</strong><small>Describe project — AI picks deliverables</small></div>
+      </button>
+      <button class="mode-btn" id="modeManual" onclick="switchMode('manual')">
+        <span class="mode-icon">✦</span>
+        <div><strong>Manual Picker</strong><small>Select deliverables from rate card</small></div>
+      </button>
+    </div>
+
+    <div class="two-col">
+      <div class="form-col">
+
+        <div class="card">
+          <div class="card-title">Project Details</div>
+          <div class="row-2">
+            <div>
+              <label>Client</label>
+              <select id="clientName" onchange="onClientChange()"><option value="">Loading…</option></select>
+            </div>
+            <div>
+              <label>Segment / Division</label>
+              <input id="clientSeg" type="text" placeholder="e.g. Retail Banking">
+            </div>
+          </div>
+          <label>Project Name</label>
+          <input id="projName" type="text" placeholder="e.g. ENBD – Ramadan Home Loan Campaign 2026">
+          <div class="row-2">
+            <div>
+              <label>Estimate Ref #</label>
+              <input id="estRef" type="text" placeholder="EST-2026-001">
+            </div>
+            <div>
+              <label>Status</label>
+              <select id="estStatus">
+                <option>DRAFT</option>
+                <option>PENDING APPROVAL</option>
+                <option>APPROVED</option>
+                <option>REVISED</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI MODE -->
+        <div id="aiMode">
+          <div class="card">
+            <div class="card-title">Project Brief</div>
+            <div class="brief-tabs">
+              <button class="tab-btn active" data-tab="type">✏️ Type</button>
+              <button class="tab-btn" data-tab="attach">📎 Upload &amp; Voice</button>
+            </div>
+            <div class="tab-panel active" id="tab-type">
+              <textarea id="briefText" placeholder="Describe the project — campaign objectives, target audience, deliverables required (eDMs, social posts, videos, banners), languages, adaptations…"></textarea>
+            </div>
+            <div class="tab-panel" id="tab-attach">
+              <div class="attach-section-label">Upload Brief Document</div>
+              <div class="drop-zone" id="briefDropZone" onclick="pickBriefFile()">
+                <div class="drop-icon">📄</div>
+                <div class="drop-label">Click to upload brief</div>
+                <div class="drop-sub">PDF, Word (.docx), or plain text (.txt)</div>
+              </div>
+              <div class="file-pill hidden" id="briefFilePill">
+                <span id="briefFileName"></span>
+                <button onclick="clearBriefFile()">×</button>
+              </div>
+              <div class="attach-divider"><span>and / or</span></div>
+              <div class="attach-section-label">Record Voice Note</div>
+              <div class="voice-area">
+                <button class="record-btn" id="recordBtn" onclick="toggleRecord()">
+                  <span class="rec-icon" id="recIcon">⏺</span>
+                  <span id="recLabel">Tap to Record</span>
+                </button>
+                <div class="rec-timer hidden" id="recTimer">00:00</div>
+                <div class="rec-status" id="recStatus">Tap to start — describe the project out loud</div>
+              </div>
+              <div class="transcribed hidden" id="transcribedBox">
+                <div class="transcribed-label">Transcribed — review and edit before generating</div>
+                <textarea id="transcribedText" rows="5"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Historical Estimates <span class="card-sub">(optional — improves accuracy)</span></div>
+            <div class="drop-zone small" id="histDropZone" onclick="pickHistFile()">
+              <div class="drop-icon">📊</div>
+              <div class="drop-label">Upload historical estimates Excel</div>
+              <div class="drop-sub">.xlsx file — each sheet = one past project</div>
+            </div>
+            <div class="file-pill hidden" id="histFilePill">
+              <span id="histFileName"></span>
+              <span id="histSheetCount" class="pill-badge"></span>
+              <button onclick="clearHistFile()">×</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Reference Project <span class="card-sub">(optional)</span></div>
+            <label>Previous project name to reference</label>
+            <input id="refProject" type="text" placeholder="e.g. ENBD Ramadan Campaign 2025">
+            <label>What is different / new in this project</label>
+            <textarea id="diffText" rows="3" placeholder="Describe only what has changed or is new…"></textarea>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Notes</div>
+            <textarea id="notesText" rows="3" placeholder="Any special notes, assumptions, or caveats…"></textarea>
+          </div>
+
+          <div class="err-box hidden" id="errBox"></div>
+          <button class="gen-btn" id="genBtn" onclick="generate()">
+            <span id="genBtnIcon">🤖</span>
+            <span id="genBtnLabel">Generate with AI</span>
+          </button>
+        </div>
+
+        <!-- MANUAL MODE -->
+        <div id="manualMode" class="hidden">
+          <div class="card">
+            <div class="card-title">Deliverables</div>
+            <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Pick a type — cost auto-fills from rate card. Edit description or cost as needed.</p>
+            <div class="del-col-hdr">
+              <span>TYPE</span><span>CUSTOM DESCRIPTION (OPTIONAL)</span><span style="text-align:right">AED</span><span></span>
+            </div>
+            <div class="del-list" id="manualDelList"></div>
+            <button class="add-del-btn" onclick="addManualRow()">+ Add deliverable</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Notes</div>
+            <textarea id="manualNotesText" rows="3" placeholder="Any special notes, assumptions, or caveats…"></textarea>
+          </div>
+          <div class="err-box hidden" id="errBoxManual"></div>
+          <button class="gen-btn" onclick="generateManual()">
+            <span>✦</span><span>Build Estimate</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-col">
+        <div class="preview-empty" id="previewEmpty">
+          <div class="preview-empty-icon">◈</div>
+          <div class="preview-empty-title">Estimate preview</div>
+          <div class="preview-empty-sub">Fill in the form and click Generate — your estimate will appear here.</div>
+        </div>
+        <div class="preview-result hidden" id="previewResult">
+          <div class="preview-header">
+            <div>
+              <div class="preview-proj" id="previewProjName"></div>
+              <div class="preview-meta" id="previewMeta"></div>
+            </div>
+            <div class="preview-total-box">
+              <div class="preview-total-label">Grand Total</div>
+              <div class="preview-total" id="previewTotal"></div>
+            </div>
+          </div>
+          <div class="preview-table-wrap">
+            <table class="preview-table">
+              <thead><tr><th>Deliverable</th><th>Scope</th><th class="cost-th">AED</th></tr></thead>
+              <tbody id="previewTableBody"></tbody>
+            </table>
+          </div>
+          <div class="preview-totals">
+            <div class="tot-row"><span>Subtotal</span><span id="prevSubtotal"></span></div>
+            <div class="tot-row"><span>5% VAT</span><span id="prevVat"></span></div>
+            <div class="tot-row grand"><span>Grand Total</span><span id="prevGrand"></span></div>
+          </div>
+          <div class="sanity-issues" id="sanityIssues" style="display:none">
+            <div class="sanity-title">⚠ Review Notes</div>
+            <div id="sanityIssuesList"></div>
+          </div>
+          <div class="preview-actions">
+            <button class="dl-btn" onclick="downloadExcel()">⬇ Download Excel</button>
+            <button class="secondary-btn" onclick="resetForm()">New Estimate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="page-header">
+      <h1>Estimate History</h1>
+      <p>All estimates generated in this browser.</p>
+    </div>
+    <div id="historyList" class="history-list"></div>
+    <div id="historyEmpty" class="empty-state hidden">
+      <div class="empty-icon">◎</div>
+      <div>No estimates saved yet.</div>
+    </div>
+  </div>
+
+  <!-- CLIENTS PAGE -->
+  <div class="page" id="page-clients">
+    <div class="page-header">
+      <h1>Clients</h1>
+      <p>Manage client rate cards and historical estimate data.</p>
+    </div>
+    <button class="add-client-btn" onclick="openAddClient()">+ Add New Client</button>
+    <div id="clientsList" class="clients-list"></div>
+    <div id="clientsEmpty" class="empty-state" style="display:none">
+      <div class="empty-icon">👥</div>
+      <div>No clients yet. Add your first client above.</div>
+    </div>
+  </div>
+
+  <!-- CLIENT MODAL -->
+  <div class="modal-overlay" id="clientModal" style="display:none">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Add Client</div>
+        <button class="modal-close" onclick="closeClientModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <label>Client Name</label>
+        <input id="modalClientName" type="text" placeholder="e.g. Emirates NBD">
+        <div class="modal-section-title">Historical Estimates</div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:10px">Upload this client's historical estimate Excel file to improve AI accuracy. Each sheet = one project.</p>
+        <div class="drop-zone small" id="clientExcelZone" onclick="pickClientExcel()">
+          <div class="drop-icon">📊</div>
+          <div class="drop-label">Click to upload historical estimates</div>
+          <div class="drop-sub">.xlsx file with past project estimates</div>
+        </div>
+        <div class="file-pill" id="clientExcelPill" style="display:none">
+          <span id="clientExcelName"></span>
+          <span id="clientExcelCount" class="pill-badge"></span>
+          <button onclick="clearClientExcel()">×</button>
+        </div>
+        <div class="modal-section-title">Rate Card <span style="font-size:10px;color:var(--muted);font-weight:400">(AED — edit to customise for this client)</span></div>
+        <div class="rate-grid" id="modalRateGrid"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="closeClientModal()">Cancel</button>
+        <button class="gen-btn" style="width:auto;padding:12px 28px" onclick="saveClient()">Save Client</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div class="page-header">
+      <h1>Settings</h1>
+      <p>Configure the AI model and preferences.</p>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div class="card-title">Ollama Configuration</div>
+      <label>Ollama URL</label>
+      <input id="ollamaUrl" type="text" value="http://localhost:11434">
+      <label>Model</label>
+      <select id="modelSelect">
+        <option value="llama3">llama3 (recommended)</option>
+        <option value="llama3.1">llama3.1</option>
+        <option value="mistral">mistral</option>
+        <option value="phi3">phi3 (lightweight)</option>
+        <option value="gemma2">gemma2</option>
+      </select>
+      <button class="test-btn" onclick="testOllamaConn()">Test Connection</button>
+      <div class="test-result hidden" id="testResult"></div>
+    </div>
+    <div class="card" style="max-width:560px;margin-top:16px">
+      <div class="card-title">About</div>
+      <p style="color:var(--muted);font-size:13px;line-height:1.7">
+        Estimix v1.0 by Nebulix<br>
+        Generates estimates using your local Ollama AI model.<br>
+        All data stored locally in your browser.<br><br>
+        <strong style="color:var(--accent)">Setup required:</strong><br>
+        1. Install Ollama from <a href="https://ollama.com" target="_blank" style="color:var(--accent)">ollama.com</a><br>
+        2. Run: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">ollama pull llama3</code><br>
+        3. Start: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">ollama serve</code><br><br>
+        <strong style="color:var(--muted)">Note:</strong> localhost requests work from any origin in modern browsers. If using a remote Ollama URL, ensure CORS is enabled via <code style="background:var(--bg);padding:2px 6px;border-radius:4px">OLLAMA_ORIGINS=*</code>.
+      </p>
+    </div>
+    <div class="card" style="max-width:560px;margin-top:16px">
+      <div class="card-title">My Access</div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">If you've purchased Estimix Pro, enter your email to restore access.</p>
+      <div style="display:flex;gap:8px">
+        <input type="email" id="restoreEmail" placeholder="your@email.com" style="margin:0;flex:1">
+        <button class="test-btn" style="margin-top:0;white-space:nowrap" onclick="restoreAccess()">Check Access</button>
+      </div>
+      <div id="restoreMsg" style="font-size:12px;margin-top:8px;min-height:18px"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <span>© 2026 Nebulix | All rights reserved.</span>
+    <span class="footer-sep">·</span>
+    <a href="/privacy.html">Privacy Policy</a>
+    <span class="footer-sep">·</span>
+    <a href="/terms.html">Terms</a>
+  </footer>
+
+</main>
+
+<!-- Generation overlay -->
+<div class="gen-overlay" id="genOverlay">
+  <div class="gen-overlay-box">
+    <div class="gen-spinner"></div>
+    <div class="gen-overlay-title">Generating Estimate…</div>
+    <div class="gen-overlay-step" id="genOverlayStep">Reading project brief…</div>
+    <div class="gen-progress-bar"><div class="gen-progress-fill" id="genProgressFill"></div></div>
+  </div>
+</div>
+
+<!-- Paywall modal -->
+<div class="pw-modal" id="paywallModal" style="display:none">
+  <div class="pw-box">
+    <div class="pw-header">
+      <div class="pw-icon">⚡</div>
+      <div class="pw-title">Upgrade Estimix</div>
+      <div class="pw-subtitle">You've used your 3 free estimates. Upgrade to generate unlimited estimates.</div>
+    </div>
+    <div class="pw-body">
+      <div class="pw-plans">
+        <div class="pw-plan active" data-plan="pro" onclick="selectPlan(this)">
+          <div class="pw-plan-name">Pro</div>
+          <div class="pw-plan-price">AED 99</div>
+          <div class="pw-plan-desc">Single user · Unlimited estimates · 1 year</div>
+        </div>
+        <div class="pw-plan" data-plan="team" onclick="selectPlan(this)">
+          <div class="pw-plan-name">Team</div>
+          <div class="pw-plan-price">AED 249</div>
+          <div class="pw-plan-desc">Up to 5 users · Unlimited estimates · 1 year</div>
+        </div>
+      </div>
+      <label>Your email</label>
+      <div class="pw-email-row">
+        <input type="email" id="pwEmail" placeholder="your@email.com" autocomplete="email">
+        <button class="btn-pw-pay" onclick="handlePaywall()">Purchase →</button>
+      </div>
+      <div class="pw-msg" id="pwMsg"></div>
+      <div class="pw-divider">already paid? check your access</div>
+      <div class="pw-email-row" style="margin-bottom:0">
+        <input type="email" id="pwAccessEmail" placeholder="your@email.com" autocomplete="email">
+        <button class="btn-pw-pay" style="width:auto;padding:11px 18px;font-size:13px;white-space:nowrap" onclick="checkEmailAccess()">Check Access</button>
+      </div>
+      <div id="keyMsg"></div>
+      <div style="text-align:center;margin-top:16px">
+        <button onclick="closePaywall()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline">Maybe later</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Supabase ─────────────────────────────────────────────────────────────────
+const SB_URL = "https://ghkfnrsxhvwabyctbyxm.supabase.co";
+const SB_KEY = "sb_publishable_zNcdheN630lTaNxhRiDfaw_iaEUTnKm";
+const sbH = {"apikey":SB_KEY,"Authorization":`Bearer ${SB_KEY}`,"Content-Type":"application/json","Prefer":"return=minimal"};
+async function sbPost(t,d){try{const r=await fetch(`${SB_URL}/rest/v1/${t}`,{method:"POST",headers:{...sbH,"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(d)});return r.ok?true:null}catch{return null}}
+async function sbGet(t,q){try{const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:sbH});return r.ok?r.json():null}catch{return null}}
+
+// ─── Freemium ─────────────────────────────────────────────────────────────────
+const FREE_LIMIT=3, PRO_KEY='estimix_pro_email', PLAN_KEY='estimix_pro_plan', USES_KEY='estimix_uses';
+function isPro(){return!!localStorage.getItem(PRO_KEY)}
+function getUses(){return parseInt(localStorage.getItem(USES_KEY)||'0')}
+function incrementUses(){localStorage.setItem(USES_KEY,(getUses()+1).toString())}
+function usesLeft(){return Math.max(0,FREE_LIMIT-getUses())}
+function updateBanner(){
+  const b=document.getElementById('usageBanner'),u=document.getElementById('bannerUses');
+  if(!b)return;
+  if(isPro()){b.style.display='none';return}
+  b.style.display='flex';
+  if(u)u.textContent=usesLeft();
+}
+function showPaywall(){document.getElementById('paywallModal').style.display='flex'}
+function closePaywall(){document.getElementById('paywallModal').style.display='none'}
+function selectPlan(el){document.querySelectorAll('.pw-plan').forEach(p=>p.classList.remove('active'));el.classList.add('active')}
+function handlePaywall(){
+  const email=document.getElementById('pwEmail').value.trim();
+  const msg=document.getElementById('pwMsg');
+  if(!email||!email.includes('@')){msg.style.color='var(--danger)';msg.textContent='Please enter a valid email.';return}
+  const plan=document.querySelector('.pw-plan.active')?.dataset.plan||'pro';
+  const planName=plan==='team'?'Team':'Pro';
+  const price=plan==='team'?'AED 249':'AED 99';
+  const sub=encodeURIComponent(`Estimix ${planName} — Purchase Request`);
+  const body=encodeURIComponent(`Hi,\n\nI'd like to purchase Estimix ${planName} (${price}/year).\n\nEmail: ${email}\n\nPlease send payment details.\n\nThank you.`);
+  window.location.href=`mailto:hello@nebulixcloud.com?subject=${sub}&body=${body}`;
+  sbPost('nblx_users',{email,name:'',source:'estimix'});
+  msg.style.color='var(--muted)';msg.textContent='Email app should open — send the message to complete your purchase.';
+}
+async function checkEmailAccess(){
+  const email=document.getElementById('pwAccessEmail').value.trim().toLowerCase();
+  const msg=document.getElementById('keyMsg');
+  if(!email||!email.includes('@')){msg.style.color='var(--danger)';msg.textContent='Please enter your email.';return}
+  msg.style.color='var(--muted)';msg.textContent='Checking…';
+  const rows=await sbGet('nblx_app_access',`email=eq.${encodeURIComponent(email)}&app=eq.estimix&select=*`);
+  if(!rows||!rows.length){msg.style.color='var(--danger)';msg.textContent='No access found. Contact hello@nebulixcloud.com';return}
+  const a=rows[0];
+  if(a.status!=='active'){msg.style.color='var(--danger)';msg.textContent='Access revoked. Contact hello@nebulixcloud.com';return}
+  if(a.expires_at&&new Date(a.expires_at)<new Date()){msg.style.color='var(--danger)';msg.textContent='Access expired. Contact hello@nebulixcloud.com to renew.';return}
+  localStorage.setItem(PRO_KEY,email);localStorage.setItem(PLAN_KEY,a.plan||'pro');
+  msg.style.color='var(--success)';msg.textContent='✓ Access confirmed! Unlocking…';
+  setTimeout(()=>{closePaywall();updateBanner()},1200);
+}
+async function restoreAccess(){
+  const email=document.getElementById('restoreEmail').value.trim().toLowerCase();
+  const msg=document.getElementById('restoreMsg');
+  if(!email||!email.includes('@')){msg.style.color='var(--danger)';msg.textContent='Please enter your email.';return}
+  msg.style.color='var(--muted)';msg.textContent='Checking…';
+  const rows=await sbGet('nblx_app_access',`email=eq.${encodeURIComponent(email)}&app=eq.estimix&select=*`);
+  if(!rows||!rows.length){msg.style.color='var(--danger)';msg.textContent='No access found.';return}
+  const a=rows[0];
+  if(a.status!=='active'){msg.style.color='var(--danger)';msg.textContent='Access revoked.';return}
+  if(a.expires_at&&new Date(a.expires_at)<new Date()){msg.style.color='var(--danger)';msg.textContent='Access expired.';return}
+  localStorage.setItem(PRO_KEY,email);localStorage.setItem(PLAN_KEY,a.plan||'pro');
+  msg.style.color='var(--success)';msg.textContent='✓ Access confirmed!';
+  updateBanner();
+}
+
+// ─── Rate card ────────────────────────────────────────────────────────────────
+const RATES=[
+  ["eDM – Design & Layout (English)",150,"Design and layout of the eDM as per client master brand guidelines. Includes responsive email structure, hero image placement, offer section design, iconography, and CTA button design. English version.","edm_design_en"],
+  ["eDM – Design & Layout (Arabic)",150,"Design and layout of the eDM as per client master brand guidelines. Includes right-to-left layout structure, Arabic typography treatment, imagery placement, and CTA button design. Arabic version.","edm_design_ar"],
+  ["eDM – Copywriting (English)",75,"English copywriting for all sections of the eDM including headline, subheadline, body copy, offer details, terms summary, and CTA text. Copy aligned to client brand voice and campaign messaging.","edm_copy_en"],
+  ["eDM – Copywriting (Arabic)",75,"Arabic copywriting for all sections of the eDM including headline, subheadline, body copy, offer details, terms summary, and CTA text. Native Arabic language copy aligned to client brand tone.","edm_copy_ar"],
+  ["eDM – Design Adaptation (English)",60,"Adaptation of existing eDM design for a different audience segment or product variant. Base layout and brand structure retained; hero image, offer section, and segment-specific elements updated. English version.","edm_adapt_design_en"],
+  ["eDM – Design Adaptation (Arabic)",60,"Adaptation of existing eDM design for a different audience segment or product variant. Base layout and brand structure retained; hero image, offer section, and segment-specific elements updated. Arabic version.","edm_adapt_design_ar"],
+  ["eDM – Copy Adaptation (English)",30,"Minor English copy updates to existing eDM template. Updating offer rate, product details, dates, or segment-specific messaging while retaining the overall structure and tone.","edm_adapt_copy_en"],
+  ["eDM – Copy Adaptation (Arabic)",30,"Minor Arabic copy updates to existing eDM template. Updating offer rate, product details, dates, or segment-specific messaging while retaining the overall structure and tone.","edm_adapt_copy_ar"],
+  ["eDM – Arabic Proofing",50,"Professional Arabic language proofing and quality check of all Arabic copy elements within the eDM. Includes grammar, spelling, tone, and brand terminology review.","edm_proofing_ar"],
+  ["Key Visual – Campaign Concept Development",500,"Development of the overarching campaign concept and messaging strategy. Multiple creative directions presented to the client for review and selection prior to final key visual development.","kv_concept"],
+  ["Key Visual – Master Artwork (English)",400,"Creation of the master campaign key visual artwork. Includes AI-assisted image generation, Photoshop compositing, brand element integration, stock image sourcing and application, and brand guideline compliance. English version.","kv_artwork_en"],
+  ["Key Visual – Master Artwork (Arabic Adaptation)",150,"Arabic language adaptation of the master key visual. Includes right-to-left text placement, Arabic typography treatment, layout recomposition for Arabic reading direction, and brand compliance check.","kv_artwork_ar"],
+  ["Key Visual – Secondary Variant Artwork",300,"Development of a secondary key visual for an additional target segment, product variant, or campaign phase. Adapted from the master concept with relevant visual and messaging adjustments.","kv_secondary"],
+  ["Key Visual – Teaser Artwork",250,"Development of a teaser key visual for the pre-campaign awareness phase. Adapted from the master campaign concept with teaser messaging treatment and partial reveal visual approach.","kv_teaser"],
+  ["Key Visual – English Copywriting",100,"Development of all English copy for the key visual including main headline, subheadline, offer details, rate callout, disclaimer line, and CTA text. Copy aligned to client brand tone and campaign strategy.","kv_copy_en"],
+  ["Key Visual – Arabic Copywriting",100,"Development of all Arabic copy for the key visual including main headline, subheadline, offer details, rate callout, disclaimer line, and CTA text. Native Arabic language copy aligned to client brand tone.","kv_copy_ar"],
+  ["Video – Motion Design (English)",200,"Development of the campaign video/motion graphic. Includes animation of key visual elements, text animation, brand element integration, stock footage sourcing and integration, and music integration. English version.","video_design_en"],
+  ["Video – Motion Design (Arabic)",150,"Arabic version of the campaign video/motion graphic. Includes Arabic text animation, right-to-left text treatment, and all motion elements from the English version adapted for Arabic.","video_design_ar"],
+  ["Video – Script / Copywriting (English)",50,"English script and on-screen copy development for the video. Includes voiceover script, on-screen headline, offer text, animated copy lines, disclaimer, and CTA text.","video_copy_en"],
+  ["Video – Size Adaptation (per size per language)",100,"Adaptation of the master video to an alternate size format. Layout and composition reframed for the new dimensions. One size and one language version per line item.","video_resize"],
+  ["Social Post – Design (Vertical Master)",90,"Full design of vertical social media post with custom visuals, brand elements, and campaign imagery. Designed as the master size for the primary social platform.","social_design_vertical"],
+  ["Social Post – Design (Square Adaptation)",30,"Resizing and layout adaptation of the vertical master social post to square format. Layout recomposed for square dimensions.","social_design_square"],
+  ["Social Post – Copywriting (English)",30,"English copywriting for the social post including headline, body copy, hashtags, and CTA aligned to campaign messaging and platform best practices.","social_copy_en"],
+  ["IG Story – Teaser Design (single frame)",65,"Single-frame teaser Instagram Story designed as per brand guidelines. Introduces the campaign theme and creates awareness ahead of the full announcement story.","ig_story_teaser"],
+  ["IG Story – Announcement Design (5 frames, English)",200,"Full 5-frame Instagram Story announcement designed as per brand guidelines. English version. Includes intro frame, offer detail frames, and CTA frame.","ig_story_announce_en"],
+  ["IG Story – Announcement Design (5 frames, Arabic)",150,"Full 5-frame Instagram Story announcement designed as per brand guidelines. Arabic version with right-to-left layout and Arabic typography treatment.","ig_story_announce_ar"],
+  ["IG Story – Copywriting (English)",50,"English copywriting for all Instagram Story frames including teaser intro, offer headline, offer details, and CTA copy for each frame.","ig_story_copy_en"],
+  ["IG Story – Copywriting (Arabic)",50,"Arabic copywriting for all Instagram Story frames. Native Arabic copy for teaser intro, offer headline, offer details, and CTA for each frame.","ig_story_copy_ar"],
+  ["IG Story – Design Adaptation (English)",100,"Design adaptation of the master Instagram Story for an alternate branch location, audience segment, or locale. Layout and visuals updated accordingly. English version.","ig_story_adapt_en"],
+  ["IG Story – Design Adaptation (Arabic)",100,"Design adaptation of the master Instagram Story for an alternate branch location, audience segment, or locale. Arabic version.","ig_story_adapt_ar"],
+  ["Flyer – Design Layout (8-page, English)",300,"Design and layout of 8-page DL flyer as per brand guidelines. Includes all page layouts, imagery placement, custom icons, product section design, and brand element integration. English version.","flyer_design_en"],
+  ["Flyer – Design Layout (8-page, Arabic)",300,"Design and layout of 8-page DL flyer as per brand guidelines. Full Arabic right-to-left layout with Arabic typography treatment across all 8 pages.","flyer_design_ar"],
+  ["Flyer – Copywriting (English)",100,"English copywriting for the full flyer including all section headings, body copy, product feature descriptions, eligibility criteria, terms summary, and CTA.","flyer_copy_en"],
+  ["Flyer – Copywriting (Arabic)",100,"Arabic copywriting for the full flyer. Native Arabic language copy for all sections including product feature descriptions, eligibility criteria, terms summary, and CTA.","flyer_copy_ar"],
+  ["Flyer – Design Adaptation",150,"Adaptation of existing flyer design for an updated product or card tier. Base page structure and brand elements retained; product section, card imagery, and tier-specific content updated.","flyer_adapt"],
+  ["Push Notification – Copywriting",30,"English and Arabic copy for push notification. Concise messaging within character limits communicating the key campaign offer, rate, and CTA.","push_copy"],
+  ["SMS – Copywriting",50,"SMS copy in English and Arabic. Short-form campaign messaging within SMS character limits including offer headline, key rate, and CTA link.","sms_copy"],
+  ["WhatsApp Banner – Design",30,"Adaptation of campaign key visual to WhatsApp banner standard dimensions. Layout recomposed and text treatment adjusted for WhatsApp format.","whatsapp_design"],
+  ["WhatsApp Banner – Copywriting (English + Arabic)",20,"Short-form copy for WhatsApp banner in English and Arabic. Includes offer headline, key rate callout, and CTA text within WhatsApp message format constraints.","whatsapp_copy"],
+  ["Digital Banner – Design (English)",40,"Design of digital pre-login or in-app banner as per digital brand guidelines. English version. Optimised for digital display with animated or static treatment as required.","banner_design_en"],
+  ["Digital Banner – Design (Arabic, adapted)",20,"Arabic adaptation of English digital banner. Right-to-left layout adjustment, Arabic text placement, and brand compliance check.","banner_design_ar"],
+  ["Carousel – Design + Custom Icons",120,"Design of carousel social post including custom-designed icons or illustrations for each frame. Designed as per brand guidelines.","carousel_design"],
+  ["Carousel – Copywriting (English)",30,"English copywriting for all carousel frames including individual frame headlines, benefit descriptions, and body copy.","carousel_copy_en"],
+  ["Landing Page – Content Development (English)",200,"Full landing page content development in English. Covers all product sections, key benefits, eligibility criteria, application steps, rate details, FAQs summary, and CTA.","landing_page_en"],
+  ["Landing Page – Content Development (Arabic)",175,"Full Arabic landing page content development. Covers all sections from the English version localised into native Arabic with appropriate banking terminology.","landing_page_ar"],
+  ["Brochure – Design Update",150,"Updates to existing brochure design including revised charts, updated team profile information, new imagery, layout adjustments, and file preparation for output.","brochure_design"],
+  ["Brochure – Copy Update",75,"Minor copy updates to existing brochure including updated performance figures, team names, revised product descriptions, and proofing of updated sections.","brochure_copy"],
+  ["PDF Document – Redesign / Retyping",225,"Complex update of existing PDF document. Arabic text retyped due to scrambled encoding, sections redesigned and rebuilt, and updated content placed into the document.","pdf_update"],
+  ["Card Design – Multiple options + mockups",250,"Development of multiple card design options with distinct visual treatments. Front and back mockups produced for each option. Mockups show card in 10g, 50g, and 100g variants where applicable.","card_design"],
+  ["Stock Image – Sourcing + Licensing",50,"Sourcing of suitable stock images from approved image library. Includes review and selection of shortlisted options, licensing for all required digital and print usage rights.","stock_image"],
+  ["Custom line item",0,"Enter your own description and cost","custom"],
+];
+
+const DEFAULT_RATES={};
+RATES.forEach(r=>{ if(r[3]!=='custom') DEFAULT_RATES[r[3]]=r[1]; });
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let histProjects=[], currentEstimate=null, recInterval=null, recSeconds=0;
+let _recognition=null, _isRecording=false, _transcriptParts=[];
+let _allClients=[], _editingClientId=null, _clientExcelData=null;
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+const STEPS=[[10,'Reading project brief…'],[25,'Loading client rate card…'],[40,'Sending to AI model…'],[65,'AI generating estimate…'],[85,'Running sanity check…'],[95,'Finalising…']];
+let _progressTimer=null, _stepIdx=0;
+function showProgress(){
+  const o=document.getElementById('genOverlay');o.classList.add('show');
+  _stepIdx=0;setProgressStep(0);
+  _progressTimer=setInterval(()=>{if(_stepIdx<STEPS.length-1){_stepIdx++;setProgressStep(_stepIdx)}},2200);
+}
+function setProgressStep(i){
+  const[p,l]=STEPS[i]||[95,'Almost done…'];
+  document.getElementById('genProgressFill').style.width=p+'%';
+  document.getElementById('genOverlayStep').textContent=l;
+}
+function hideProgress(){
+  clearInterval(_progressTimer);
+  document.getElementById('genProgressFill').style.width='100%';
+  document.getElementById('genOverlayStep').textContent='Done!';
+  setTimeout(()=>{document.getElementById('genOverlay').classList.remove('show');document.getElementById('genProgressFill').style.width='0%'},600);
+}
+
+// ─── Ollama ───────────────────────────────────────────────────────────────────
+function getOllamaUrl(){return(document.getElementById('ollamaUrl').value||'http://localhost:11434').replace(/\/$/,'')}
+async function ollamaStatus(){
+  try{
+    const r=await fetch(getOllamaUrl()+'/api/tags',{signal:AbortSignal.timeout(4000)});
+    if(!r.ok)return{running:false,models:[]};
+    const d=await r.json();
+    return{running:true,models:(d.models||[]).map(m=>m.name)};
+  }catch{return{running:false,models:[]}}
+}
+async function checkOllama(){
+  const dot=document.getElementById('statusDot'),text=document.getElementById('statusText');
+  if(!dot||!text)return;
+  const res=await ollamaStatus();
+  if(res.running){dot.className='status-dot online';text.textContent=res.models.length?res.models[0].split(':')[0]:'Ollama online'}
+  else{dot.className='status-dot offline';text.textContent='Ollama offline'}
+}
+async function testOllamaConn(){
+  const box=document.getElementById('testResult');
+  box.className='test-result';box.textContent='Testing…';box.classList.remove('hidden');
+  const res=await ollamaStatus();
+  box.className=res.running?'test-result ok':'test-result fail';
+  box.textContent=res.running?'✓ Connected. Models: '+(res.models.join(', ')||'none pulled yet'):'✗ Ollama not running. Run "ollama serve" in Terminal.';
+}
+async function callOllama(prompt,model,temperature=0.15,numPredict=3000){
+  const r=await fetch(getOllamaUrl()+'/api/generate',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model,prompt,stream:false,options:{temperature,num_predict:numPredict}}),
+    signal:AbortSignal.timeout(240000)
+  });
+  if(!r.ok)throw new Error('Ollama error: '+r.status);
+  const d=await r.json();
+  return d.response||'';
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    const page=document.getElementById('page-'+btn.dataset.page);
+    if(page)page.classList.add('active');
+    if(btn.dataset.page==='history')loadHistory();
+    if(btn.dataset.page==='clients')loadClientsPage();
+  });
+});
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── Mode switching ───────────────────────────────────────────────────────────
+function switchMode(mode){
+  document.getElementById('modeAI').classList.toggle('active',mode==='ai');
+  document.getElementById('modeManual').classList.toggle('active',mode==='manual');
+  if(mode==='manual'){
+    document.getElementById('aiMode').classList.add('hidden');
+    document.getElementById('manualMode').classList.remove('hidden');
+    const list=document.getElementById('manualDelList');
+    if(list&&list.children.length===0){addManualRow(0);addManualRow(1);addManualRow(10)}
+  }else{
+    document.getElementById('manualMode').classList.add('hidden');
+    document.getElementById('aiMode').classList.remove('hidden');
+  }
+  resetPreview();
+}
+
+// ─── File input helpers ───────────────────────────────────────────────────────
+function triggerFileInput(accept,cb){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept=accept;
+  inp.onchange=()=>{if(inp.files&&inp.files[0])cb(inp.files[0])};
+  inp.click();
+}
+
+// ─── Historical Excel ─────────────────────────────────────────────────────────
+function pickHistFile(){
+  triggerFileInput('.xlsx,.xls',async file=>{
+    try{
+      const ab=await file.arrayBuffer();
+      const wb=XLSX.read(ab);
+      const projects=[];
+      wb.SheetNames.forEach(name=>{
+        const ws=wb.Sheets[name];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+        const items=[];
+        let dCol=0,cCol=1;
+        for(let i=0;i<Math.min(3,rows.length);i++){
+          (rows[i]||[]).forEach((cell,j)=>{
+            const s=String(cell||'').toLowerCase();
+            if(s.includes('desc')||s.includes('deliver')||s.includes('item'))dCol=j;
+            if(s.includes('cost')||s.includes('aed')||s.includes('amount'))cCol=j;
+          });
+        }
+        rows.forEach((row,i)=>{
+          if(i===0)return;
+          const desc=String(row[dCol]||'').trim();
+          const cost=parseFloat(String(row[cCol]||'').replace(/[^\d.]/g,''))||0;
+          if(desc&&cost>0)items.push({description:desc,cost});
+        });
+        if(items.length>0)projects.push({project:name,items});
+      });
+      histProjects=projects;
+      document.getElementById('histDropZone').style.display='none';
+      document.getElementById('histFilePill').classList.remove('hidden');
+      document.getElementById('histFileName').textContent=file.name;
+      document.getElementById('histSheetCount').textContent=projects.length+' projects';
+    }catch(e){showErr('Could not read Excel: '+e)}
+  });
+}
+function clearHistFile(){
+  histProjects=[];
+  document.getElementById('histDropZone').style.display='';
+  document.getElementById('histFilePill').classList.add('hidden');
+}
+
+// ─── Brief file ───────────────────────────────────────────────────────────────
+function pickBriefFile(){
+  triggerFileInput('.pdf,.docx,.doc,.txt',async file=>{
+    try{
+      let text='';
+      const ext=file.name.split('.').pop().toLowerCase();
+      if(ext==='txt'){
+        text=await file.text();
+      }else if(ext==='docx'||ext==='doc'){
+        const ab=await file.arrayBuffer();
+        const r=await mammoth.extractRawText({arrayBuffer:ab});
+        text=r.value||'';
+      }else if(ext==='pdf'){
+        text='[PDF uploaded: '+file.name+']\n\nPlease describe the brief in the text area above, or paste the key content here.';
+      }else{
+        text=await file.text();
+      }
+      document.getElementById('briefDropZone').style.display='none';
+      document.getElementById('briefFilePill').classList.remove('hidden');
+      document.getElementById('briefFileName').textContent=file.name;
+      document.getElementById('briefText').value=text;
+    }catch(e){showErr('Could not read file: '+e)}
+  });
+}
+function clearBriefFile(){
+  document.getElementById('briefDropZone').style.display='';
+  document.getElementById('briefFilePill').classList.add('hidden');
+}
+
+// ─── Voice recording ──────────────────────────────────────────────────────────
+function toggleRecord(){
+  if(_isRecording&&_recognition){_recognition.stop()}
+  else{startVoiceRecording()}
+}
+function startVoiceRecording(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('recStatus').textContent='Voice not supported — use Chrome or Edge.';return}
+  const btn=document.getElementById('recordBtn'),status=document.getElementById('recStatus');
+  const timer=document.getElementById('recTimer'),icon=document.getElementById('recIcon');
+  _recognition=new SR();_recognition.continuous=true;_recognition.interimResults=false;_recognition.lang='en-US';
+  _transcriptParts=[];
+  _recognition.onstart=()=>{
+    _isRecording=true;btn.classList.add('recording');
+    if(icon)icon.textContent='⏹';document.getElementById('recLabel').textContent='Tap to Stop';
+    timer.classList.remove('hidden');status.textContent='Recording — speak clearly, tap Stop when done';
+    recSeconds=0;recInterval=setInterval(()=>{recSeconds++;const m=String(Math.floor(recSeconds/60)).padStart(2,'0'),s=String(recSeconds%60).padStart(2,'0');timer.textContent=m+':'+s},1000);
+  };
+  _recognition.onresult=e=>{
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)_transcriptParts.push(e.results[i][0].transcript);
+    }
+  };
+  _recognition.onend=()=>{
+    _isRecording=false;clearInterval(recInterval);
+    btn.classList.remove('recording');if(icon)icon.textContent='⏺';
+    document.getElementById('recLabel').textContent='Tap to Record';timer.classList.add('hidden');
+    const text=_transcriptParts.join(' ').trim();
+    if(text){showTranscription(text)}
+    else{status.textContent='No speech detected — try again or type your brief.'}
+  };
+  _recognition.onerror=e=>{
+    _isRecording=false;clearInterval(recInterval);btn.classList.remove('recording');
+    if(icon)icon.textContent='⏺';document.getElementById('recLabel').textContent='Tap to Record';
+    document.getElementById('recStatus').textContent=e.error==='not-allowed'?'Microphone access denied — allow in browser settings.':'Recording error — try again.';
+  };
+  _recognition.start();
+}
+function showTranscription(text){
+  document.getElementById('transcribedBox').classList.remove('hidden');
+  document.getElementById('transcribedText').value=text;
+  document.getElementById('recStatus').textContent='✓ Done — review and edit below';
+  document.getElementById('briefText').value=text;
+}
+
+// ─── Brief helper ─────────────────────────────────────────────────────────────
+function getActiveBrief(){
+  const tab=document.querySelector('.tab-btn.active')?.dataset.tab||'type';
+  let brief=tab==='attach'?(document.getElementById('transcribedText').value||document.getElementById('briefText').value).trim():document.getElementById('briefText').value.trim();
+  const diff=(document.getElementById('diffText').value||'').trim();
+  if(diff)brief+='\n\nWHAT IS DIFFERENT / NEW:\n'+diff;
+  return brief;
+}
+
+// ─── Client helpers ───────────────────────────────────────────────────────────
+function loadClientsFromStorage(){return JSON.parse(localStorage.getItem('estimix_clients')||'[]')}
+function saveClientsToStorage(c){localStorage.setItem('estimix_clients',JSON.stringify(c))}
+function getSelectedClientName(){
+  const sel=document.getElementById('clientName');
+  const id=sel?sel.value:'';
+  const c=_allClients.find(x=>x.id===id);
+  return c?c.name:'General';
+}
+function getClientRates(clientName){
+  const c=_allClients.find(x=>x.name===clientName);
+  if(c&&c.rates&&Object.keys(c.rates).length>0)return c.rates;
+  return DEFAULT_RATES;
+}
+function onClientChange(){
+  const sel=document.getElementById('clientName');
+  const id=sel?sel.value:'';
+  const c=_allClients.find(x=>x.id===id);
+  if(c&&(c.historyProjects||[]).length>0){
+    histProjects=c.historyProjects;
+    document.getElementById('histFileName').textContent=c.name+' historical data';
+    document.getElementById('histSheetCount').textContent=c.historyProjects.length+' projects';
+    document.getElementById('histFilePill').classList.remove('hidden');
+    document.getElementById('histDropZone').style.display='none';
+  }else{
+    histProjects=[];
+    document.getElementById('histFilePill').classList.add('hidden');
+    document.getElementById('histDropZone').style.display='';
+  }
+}
+function loadClientsIntoSelector(){
+  _allClients=loadClientsFromStorage();
+  const sel=document.getElementById('clientName');
+  if(!sel)return;
+  sel.innerHTML='';
+  if(!_allClients.length){
+    // seed Emirates NBD default
+    const seed={id:'emirates_nbd',name:'Emirates NBD',rates:Object.assign({},DEFAULT_RATES),historyProjects:[],createdAt:new Date().toISOString()};
+    _allClients=[seed];saveClientsToStorage(_allClients);
+  }
+  _allClients.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;sel.appendChild(o)});
+  const enbd=_allClients.find(c=>c.name==='Emirates NBD');
+  if(enbd)sel.value=enbd.id;
+  onClientChange();
+}
+
+// ─── Prompt builder ───────────────────────────────────────────────────────────
+function buildRateCardStr(clientName){
+  const rates=getClientRates(clientName);
+  return RATES.filter(r=>r[3]!=='custom').map(r=>{
+    const cost=rates[r[3]]!==undefined?rates[r[3]]:r[1];
+    return`  KEY=${r[3]} | ${r[0]} | AED ${cost}`;
+  }).join('\n');
+}
+function buildPrompt(payload){
+  const{projectName,clientName,brief,historicalProjects,referenceProject}=payload;
+  let history='';
+  (historicalProjects||[]).slice(0,5).forEach(p=>{
+    const lines=(p.items||[]).slice(0,10).map(i=>`  - ${i.description}: AED ${i.cost}`).join('\n');
+    history+=`\nProject: ${p.project||p.projectName||'Past project'}\n${lines}\n`;
+  });
+  let refSection='';
+  if(referenceProject){
+    const ref=(historicalProjects||[]).find(p=>(p.project||p.projectName||'').toLowerCase().includes(referenceProject.toLowerCase()));
+    if(ref){
+      refSection=`\n\nREFERENCE PROJECT — carry these items forward unless the brief says otherwise:\n`;
+      (ref.items||[]).forEach(i=>{refSection+=`  - ${i.description}: AED ${i.cost}\n`});
+      refSection+='\nAdapt descriptions and costs to the new brief. New deliverables take priority.';
+    }
+  }
+  return`You are a senior creative agency estimator for ${clientName}.
+You produce detailed estimates where every deliverable is broken into individual sub-items.
+
+APPROVED RATE CARD FOR ${clientName.toUpperCase()} (use these exact keys and costs):
+${buildRateCardStr(clientName)}
+
+HISTORICAL CONTEXT:
+${history||'(none provided)'}
+${refSection}
+
+RULES — CRITICAL:
+1. Use ONLY items from the rate card above. Do not invent new items or prices.
+2. Output one line per sub-item using this exact pipe format:
+   ITEM | KEY | custom description | cost
+3. KEY must exactly match a KEY from the rate card above
+4. The custom description should be specific to this project (mention the product, segment, or campaign detail)
+5. Cost must exactly match the rate card cost for that KEY
+6. English and Arabic are always separate line items
+7. Design and copywriting are always separate line items — never combine them
+8. Do NOT output totals, headers, or any text other than ITEM lines
+
+EXAMPLE FORMAT:
+ITEM | edm_design_en | Design and layout of the eDM for the ${clientName} Ramadan Home Loan campaign. Includes hero image placement, offer section, and CTA button design. English version. | 150
+ITEM | edm_copy_en | English copywriting for the Ramadan Home Loan eDM including headline, rate callout, eligibility details, and CTA text. | 75
+
+PROJECT BRIEF:
+${brief}
+
+List all deliverables now:`;
+}
+function parsePipeResponse(text,clientName){
+  const rates=getClientRates(clientName);
+  const keyMap={};
+  RATES.forEach(r=>{if(r[3]!=='custom')keyMap[r[3]]=r});
+  const items=[];
+  text.split('\n').forEach(line=>{
+    line=line.trim();
+    if(!line.toUpperCase().startsWith('ITEM'))return;
+    const parts=line.split('|').map(p=>p.trim());
+    if(parts.length<3)return;
+    const key=parts[1];
+    const desc=parts[2]||'';
+    const rateEntry=keyMap[key];
+    if(rateEntry){
+      const lockedCost=rates[key]!==undefined?rates[key]:rateEntry[1];
+      if(lockedCost>0){
+        items.push({description:desc&&desc.length>10?desc:rateEntry[0],detail:rateEntry[2],cost:lockedCost});
+      }
+    }else if(desc&&parts[3]){
+      const cost=parseFloat(String(parts[3]).replace(/[^\d.]/g,''))||0;
+      if(cost>0)items.push({description:desc,detail:'Custom deliverable',cost});
+    }
+  });
+  return items;
+}
+async function runSanityCheck(items,brief,model,clientName){
+  if(!items.length)return[];
+  const itemsText=items.map(i=>`  - ${i.description}: AED ${i.cost}`).join('\n');
+  const prompt=`Review this estimate for the brief below.
+
+BRIEF (summary):
+${brief.slice(0,500)}
+
+ESTIMATE:
+${itemsText}
+
+Check for: wrong costs, duplicate items, obvious missing deliverables.
+Respond ONLY with lines in this format: ISSUE | item name | problem
+If no issues, respond with exactly: OK
+
+Begin:`;
+  try{
+    const res=await callOllama(prompt,model,0.1,500);
+    if(res.trim()==='OK'||!res.trim())return[];
+    const issues=[];
+    res.split('\n').forEach(line=>{
+      line=line.trim();
+      if(line.toUpperCase().startsWith('ISSUE')){
+        const p=line.split('|');
+        if(p.length>=3)issues.push({item:p[1].trim(),problem:p[2].trim()});
+      }
+    });
+    return issues;
+  }catch{return[]}
+}
+
+// ─── AI Generate ──────────────────────────────────────────────────────────────
+async function generate(){
+  clearErr();
+  if(!isPro()&&getUses()>=FREE_LIMIT){showPaywall();return}
+  const projName=document.getElementById('projName').value.trim();
+  const clientName=getSelectedClientName();
+  const clientSeg=document.getElementById('clientSeg').value.trim();
+  const estRef=document.getElementById('estRef').value.trim();
+  const status=document.getElementById('estStatus').value;
+  const notes=document.getElementById('notesText').value.trim();
+  const brief=getActiveBrief();
+  if(!projName){showErr('Please enter a project name.');return}
+  if(!brief){showErr('Please provide a project brief.');return}
+  const os=await ollamaStatus();
+  if(!os.running){showErr('Ollama is not running. Open Terminal and run: ollama serve');return}
+  const model=document.getElementById('modelSelect').value;
+  setGenerating(true);showProgress();
+  try{
+    const refProject=(document.getElementById('refProject').value||'').trim();
+    const prompt=buildPrompt({projectName:projName,clientName,brief,historicalProjects:histProjects,referenceProject:refProject});
+    const raw=await callOllama(prompt,model);
+    let items=parsePipeResponse(raw,clientName);
+    if(!items.length){showErr('AI returned no items. Try a more detailed brief, or check your Ollama model is loaded.');setGenerating(false);hideProgress();return}
+    const issues=await runSanityCheck(items,brief,model,clientName);
+    const subtotal=items.reduce((s,i)=>s+i.cost,0);
+    const vat=Math.round(subtotal*0.05*100)/100;
+    const grand=Math.round((subtotal+vat)*100)/100;
+    currentEstimate={projName,clientName,clientSeg,estRef,status,items,notes,subtotal,vat,grand};
+    showPreview(currentEstimate);showSanityIssues(issues);
+    incrementUses();updateBanner();
+    saveHistoryItem({id:Date.now().toString(),projectName:projName,clientSegment:clientSeg,clientName,estimateRef:estRef,itemCount:items.length,grand,createdAt:new Date().toISOString()});
+  }catch(e){showErr('Generation failed: '+e)}
+  finally{setGenerating(false);hideProgress()}
+}
+function setGenerating(on){
+  const btn=document.getElementById('genBtn');
+  btn.disabled=on;
+  if(on){
+    document.getElementById('genBtnIcon').outerHTML='<span class="spinner" id="genBtnIcon"></span>';
+    document.getElementById('genBtnLabel').textContent='Generating…';
+  }else{
+    const icon=document.getElementById('genBtnIcon');
+    if(icon)icon.outerHTML='<span id="genBtnIcon">🤖</span>';
+    document.getElementById('genBtnLabel').textContent='Generate with AI';
+  }
+}
+
+// ─── Manual generate ──────────────────────────────────────────────────────────
+async function generateManual(){
+  if(!isPro()&&getUses()>=FREE_LIMIT){showPaywall();return}
+  const projName=document.getElementById('projName').value.trim();
+  const errBox=document.getElementById('errBoxManual');
+  errBox.classList.add('hidden');
+  if(!projName){errBox.textContent='Please enter a project name.';errBox.classList.remove('hidden');return}
+  const items=getManualItems();
+  if(!items.length){errBox.textContent='Please add at least one deliverable with a cost.';errBox.classList.remove('hidden');return}
+  updateManualPreview();
+  incrementUses();updateBanner();
+  saveHistoryItem({id:Date.now().toString(),projectName:projName,clientSegment:document.getElementById('clientSeg').value.trim(),estimateRef:document.getElementById('estRef').value.trim(),itemCount:items.length,grand:currentEstimate.grand,createdAt:new Date().toISOString()});
+}
+
+// ─── Preview ──────────────────────────────────────────────────────────────────
+function showPreview({projName,clientSeg,estRef,items,subtotal,vat,grand}){
+  document.getElementById('previewEmpty').classList.add('hidden');
+  document.getElementById('previewResult').classList.remove('hidden');
+  document.getElementById('previewProjName').textContent=projName;
+  document.getElementById('previewMeta').textContent=[clientSeg,estRef].filter(Boolean).join(' · ')||'Estimate';
+  document.getElementById('previewTotal').textContent='AED '+grand.toLocaleString();
+  document.getElementById('previewTableBody').innerHTML=items.map(i=>`<tr><td>${i.description}</td><td class="scope-td">${i.detail||''}</td><td>AED ${i.cost.toLocaleString()}</td></tr>`).join('');
+  document.getElementById('prevSubtotal').textContent='AED '+subtotal.toLocaleString();
+  document.getElementById('prevVat').textContent='AED '+vat.toFixed(2);
+  document.getElementById('prevGrand').textContent='AED '+grand.toLocaleString();
+}
+function resetPreview(){
+  document.getElementById('previewEmpty').classList.remove('hidden');
+  document.getElementById('previewResult').classList.add('hidden');
+  const si=document.getElementById('sanityIssues');if(si)si.style.display='none';
+}
+function showSanityIssues(issues){
+  const box=document.getElementById('sanityIssues'),list=document.getElementById('sanityIssuesList');
+  if(!box||!list)return;
+  if(!issues||!issues.length){box.style.display='none';return}
+  list.innerHTML=issues.map(i=>`<div class="sanity-issue-item"><strong>${i.item}</strong> — ${i.problem}</div>`).join('');
+  box.style.display='block';
+}
+
+// ─── Download Excel ───────────────────────────────────────────────────────────
+function downloadExcel(){
+  if(!currentEstimate)return;
+  const{projName,clientSeg,estRef,status,items,notes}=currentEstimate;
+  const rows=[
+    ['ESTIMATE'],[''],
+    ['Project Name',projName],['Client / Segment',clientSeg||''],['Estimate Ref',estRef||''],['Status',status||''],[''],
+    ['Deliverable','Scope / Description','AED'],
+    ...items.map(i=>[i.description,i.detail||'',i.cost]),
+    [''],
+    ['Subtotal','',currentEstimate.subtotal],
+    ['5% VAT','',currentEstimate.vat],
+    ['Grand Total','',currentEstimate.grand],
+  ];
+  if(notes){rows.push([''],['Notes',notes])}
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:50},{wch:60},{wch:12}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Estimate');
+  const fname=(projName.replace(/[^a-zA-Z0-9 \-]/g,'').replace(/\s+/g,'_').substring(0,60)||'Estimate')+'_Estimate.xlsx';
+  XLSX.writeFile(wb,fname);
+}
+
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function resetForm(){
+  currentEstimate=null;
+  ['projName','clientSeg','estRef','briefText','notesText'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  resetPreview();clearErr();
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+function saveHistoryItem(item){
+  const h=JSON.parse(localStorage.getItem('estimix_history')||'[]');
+  h.unshift({...item,savedAt:new Date().toISOString()});
+  localStorage.setItem('estimix_history',JSON.stringify(h.slice(0,200)));
+}
+function loadHistory(){
+  const list=document.getElementById('historyList'),empty=document.getElementById('historyEmpty');
+  const items=JSON.parse(localStorage.getItem('estimix_history')||'[]');
+  list.innerHTML='';
+  if(!items.length){empty.classList.remove('hidden');return}
+  empty.classList.add('hidden');
+  items.forEach(item=>{
+    const date=new Date(item.savedAt||item.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    const card=document.createElement('div');card.className='history-card';
+    card.innerHTML=`<div class="history-icon">📊</div><div class="history-info"><div class="history-name">${item.projectName}</div><div class="history-meta">${item.clientSegment||''} · ${item.itemCount} items · ${date}</div></div><div class="history-amount">AED ${(item.grand||0).toLocaleString()}</div><button class="history-del" onclick="deleteHistItem('${item.id}')">🗑</button>`;
+    list.appendChild(card);
+  });
+}
+function deleteHistItem(id){
+  const h=JSON.parse(localStorage.getItem('estimix_history')||'[]');
+  localStorage.setItem('estimix_history',JSON.stringify(h.filter(i=>i.id!==id)));
+  loadHistory();
+}
+
+// ─── Manual picker ────────────────────────────────────────────────────────────
+function addManualRow(selIdx,descVal,costVal){
+  selIdx=selIdx!==undefined?selIdx:0;
+  descVal=descVal!==undefined?descVal:'';
+  costVal=costVal!==undefined?costVal:RATES[selIdx][1];
+  const list=document.getElementById('manualDelList');if(!list)return;
+  const row=document.createElement('div');row.className='del-row';
+  const sel=document.createElement('select');
+  RATES.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r[0];if(i===selIdx)o.selected=true;sel.appendChild(o)});
+  const desc=document.createElement('input');desc.type='text';desc.className='del-desc';desc.placeholder='Optional custom description';desc.value=descVal;
+  const cost=document.createElement('input');cost.type='number';cost.className='del-cost';cost.min='0';cost.placeholder='0';cost.value=costVal;
+  const xBtn=document.createElement('button');xBtn.className='del-x';xBtn.innerHTML='&times;';
+  xBtn.onclick=()=>{if(list.children.length>1)row.remove();updateManualPreview()};
+  sel.onchange=()=>{cost.value=RATES[+sel.value][1]||'';updateManualPreview()};
+  cost.oninput=updateManualPreview;desc.oninput=updateManualPreview;
+  row.appendChild(sel);row.appendChild(desc);row.appendChild(cost);row.appendChild(xBtn);
+  list.appendChild(row);updateManualPreview();
+}
+function getManualItems(){
+  return[...document.querySelectorAll('#manualDelList .del-row')].map(row=>{
+    const selIdx=+row.querySelector('select').value;
+    const desc=row.querySelector('.del-desc').value.trim();
+    const cost=parseFloat(row.querySelector('.del-cost').value)||0;
+    return{description:desc||RATES[selIdx][0],detail:RATES[selIdx][2],cost};
+  }).filter(i=>i.cost>0);
+}
+function updateManualPreview(){
+  const items=getManualItems();if(!items.length){resetPreview();return}
+  const projName=document.getElementById('projName').value.trim()||'New Estimate';
+  const clientSeg=document.getElementById('clientSeg').value.trim();
+  const estRef=document.getElementById('estRef').value.trim();
+  const subtotal=items.reduce((s,i)=>s+i.cost,0);
+  const vat=Math.round(subtotal*0.05*100)/100;
+  const grand=Math.round((subtotal+vat)*100)/100;
+  currentEstimate={projName,clientSeg,estRef,status:document.getElementById('estStatus').value,items,notes:document.getElementById('manualNotesText').value.trim(),subtotal,vat,grand};
+  showPreview(currentEstimate);
+}
+
+// ─── Clients page ─────────────────────────────────────────────────────────────
+function loadClientsPage(){
+  _allClients=loadClientsFromStorage();
+  const list=document.getElementById('clientsList'),empty=document.getElementById('clientsEmpty');
+  list.innerHTML='';
+  if(!_allClients.length){empty.style.display='block';return}
+  empty.style.display='none';
+  _allClients.forEach(client=>{
+    const card=document.createElement('div');card.className='client-card';
+    const projCount=(client.historyProjects||[]).length;
+    const histStatus=projCount>0?`<span style="color:var(--success)">✓ ${projCount} historical projects</span>`:`<span style="color:var(--muted)">No historical data</span>`;
+    const rateCount=Object.values(client.rates||{}).filter(v=>v>0).length;
+    card.innerHTML=`<div class="client-icon">🏢</div><div class="client-info"><div class="client-name">${client.name}</div><div class="client-meta">${histStatus} &nbsp;·&nbsp; ${rateCount} rate items</div></div><div class="client-actions"><button class="client-edit-btn" onclick="openEditClient('${client.id}')">✏ Edit</button><button class="client-del-btn" onclick="deleteClient('${client.id}','${client.name.replace(/'/g,"\\'")}')">🗑</button></div>`;
+    list.appendChild(card);
+  });
+}
+const RATE_LABELS={};
+RATES.forEach(r=>{if(r[3]!=='custom')RATE_LABELS[r[3]]=r[0]});
+
+function openAddClient(){
+  _editingClientId=null;_clientExcelData=null;
+  document.getElementById('modalTitle').textContent='Add New Client';
+  document.getElementById('modalClientName').value='';
+  document.getElementById('clientExcelPill').style.display='none';
+  document.getElementById('clientExcelZone').style.display='';
+  buildRateGrid(Object.fromEntries(Object.keys(RATE_LABELS).map(k=>[k,0])));
+  document.getElementById('clientModal').style.display='flex';
+}
+function openEditClient(id){
+  _allClients=loadClientsFromStorage();
+  const c=_allClients.find(x=>x.id===id);if(!c)return;
+  _editingClientId=id;_clientExcelData=null;
+  document.getElementById('modalTitle').textContent='Edit Client — '+c.name;
+  document.getElementById('modalClientName').value=c.name;
+  const pCount=(c.historyProjects||[]).length;
+  if(pCount>0){
+    document.getElementById('clientExcelName').textContent=pCount+' historical projects loaded';
+    document.getElementById('clientExcelCount').textContent='click to replace';
+    document.getElementById('clientExcelPill').style.display='flex';
+    document.getElementById('clientExcelZone').style.display='none';
+  }else{
+    document.getElementById('clientExcelPill').style.display='none';
+    document.getElementById('clientExcelZone').style.display='';
+  }
+  buildRateGrid(c.rates||DEFAULT_RATES);
+  document.getElementById('clientModal').style.display='flex';
+}
+function closeClientModal(){document.getElementById('clientModal').style.display='none'}
+function buildRateGrid(rates){
+  const grid=document.getElementById('modalRateGrid');grid.innerHTML='';
+  Object.entries(RATE_LABELS).forEach(([key,label])=>{
+    const val=rates[key]!==undefined?rates[key]:(DEFAULT_RATES[key]||0);
+    const item=document.createElement('div');item.className='rate-item';item.dataset.rateKey=key;
+    item.innerHTML=`<label>${label}</label><input type="number" min="0" data-key="${key}" value="${val}">`;
+    grid.appendChild(item);
+  });
+}
+function getRatesFromGrid(){
+  const rates={};
+  document.querySelectorAll('#modalRateGrid .rate-item').forEach(row=>{
+    const inp=row.querySelector('input[data-key]');if(!inp)return;
+    rates[inp.dataset.key]=parseFloat(inp.value)||0;
+  });
+  return rates;
+}
+function pickClientExcel(){
+  triggerFileInput('.xlsx,.xls',async file=>{
+    try{
+      const ab=await file.arrayBuffer();
+      const wb=XLSX.read(ab);
+      const projects=[];
+      wb.SheetNames.forEach(name=>{
+        const ws=wb.Sheets[name];const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+        const items=[];let dCol=0,cCol=1;
+        for(let i=0;i<Math.min(3,rows.length);i++){
+          (rows[i]||[]).forEach((cell,j)=>{const s=String(cell||'').toLowerCase();if(s.includes('desc')||s.includes('deliver'))dCol=j;if(s.includes('cost')||s.includes('aed'))cCol=j});
+        }
+        rows.forEach((row,i)=>{if(i===0)return;const desc=String(row[dCol]||'').trim();const cost=parseFloat(String(row[cCol]||'').replace(/[^\d.]/g,''))||0;if(desc&&cost>0)items.push({description:desc,cost})});
+        if(items.length)projects.push({project:name,items});
+      });
+      _clientExcelData=projects;
+      document.getElementById('clientExcelName').textContent=file.name;
+      document.getElementById('clientExcelCount').textContent=projects.length+' projects';
+      document.getElementById('clientExcelPill').style.display='flex';
+      document.getElementById('clientExcelZone').style.display='none';
+    }catch(e){alert('Could not read Excel: '+e)}
+  });
+}
+function clearClientExcel(){_clientExcelData=null;document.getElementById('clientExcelPill').style.display='none';document.getElementById('clientExcelZone').style.display=''}
+async function saveClient(){
+  const name=document.getElementById('modalClientName').value.trim();
+  if(!name){alert('Please enter a client name.');return}
+  const rates=getRatesFromGrid();
+  const id=_editingClientId||name.toLowerCase().replace(/[^a-z0-9]/g,'_');
+  _allClients=loadClientsFromStorage();
+  const existing=_allClients.find(c=>c.id===(_editingClientId||id));
+  let historyProjects=existing?existing.historyProjects||[]:[];
+  if(_clientExcelData)historyProjects=_clientExcelData;
+  const client={id,name,rates,historyProjects,createdAt:existing?existing.createdAt:new Date().toISOString()};
+  if(existing){const idx=_allClients.indexOf(existing);_allClients[idx]=client}else{_allClients.push(client)}
+  saveClientsToStorage(_allClients);
+  closeClientModal();loadClientsPage();loadClientsIntoSelector();
+}
+function deleteClient(id,name){
+  if(!confirm('Delete client "'+name+'"? This cannot be undone.'))return;
+  _allClients=loadClientsFromStorage();
+  saveClientsToStorage(_allClients.filter(c=>c.id!==id));
+  loadClientsPage();loadClientsIntoSelector();
+}
+
+// ─── Theme ────────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  const d=document.body.classList.toggle('dark');
+  localStorage.setItem('theme',d?'dark':'light');
+  document.getElementById('themeIcon').textContent=d?'☾':'☀︎';
+  document.getElementById('themeLabel').textContent=d?'Dark mode':'Light mode';
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function showErr(msg){const b=document.getElementById('errBox');b.textContent=msg;b.classList.remove('hidden');b.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function clearErr(){document.getElementById('errBox').classList.add('hidden')}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('theme');
+  const dark=saved==='dark'||(saved===null&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if(dark){document.body.classList.add('dark');document.getElementById('themeIcon').textContent='☾';document.getElementById('themeLabel').textContent='Dark mode'}
+  document.getElementById('aiMode').classList.remove('hidden');
+  document.getElementById('manualMode').classList.add('hidden');
+  loadClientsIntoSelector();
+  updateBanner();
+  checkOllama();
+  setInterval(checkOllama,15000);
+});
+</script>
+</body>
+</html>
