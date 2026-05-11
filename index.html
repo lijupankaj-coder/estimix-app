@@ -14,7 +14,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7384833188153383" crossorigin="anonymous"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
@@ -64,14 +63,12 @@ body.dark .usage-banner{background:rgba(124,58,237,.12);border-color:rgba(124,58
 .page-header h1{font-size:30px;font-weight:800;color:var(--black);letter-spacing:-1px;margin-bottom:5px;line-height:1.1}
 .page-header p{color:var(--muted);font-size:13px}
 /* mode switcher */
-.mode-switcher{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.mode-btn{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 16px;cursor:pointer;text-align:left;transition:border-color .2s,background .2s;color:var(--text);font-family:var(--font)}
-.mode-btn:hover{border-color:var(--accent)}
-.mode-btn.active{border-color:var(--accent);background:var(--accent)}
-.mode-btn.active strong,.mode-btn.active small{color:#fff!important}
-.mode-btn .mode-icon{font-size:20px;flex-shrink:0}
-.mode-btn strong{display:block;font-size:13px;font-weight:700;color:var(--black);margin-bottom:2px}
-.mode-btn small{display:block;font-size:11px;color:var(--muted)}
+/* color picker swatch */
+.color-pick-row{display:flex;align-items:center;gap:8px;padding:10px 20px 14px;cursor:pointer;border-top:1px solid var(--border)}
+.color-pick-row span{font-size:12px;font-weight:500;color:var(--muted);flex:1}
+.color-swatch{width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid var(--border2);flex-shrink:0;transition:transform .15s}
+.color-pick-row:hover .color-swatch{transform:scale(1.15)}
+#accentColorInput{opacity:0;width:0;height:0;border:none;padding:0;position:absolute}
 /* layout */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
 .form-col{display:flex;flex-direction:column;gap:14px}
@@ -89,11 +86,6 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7870'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:32px}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 /* tabs */
-.brief-tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--bg);border-radius:8px;padding:3px}
-.tab-btn{flex:1;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:500;padding:7px 10px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
-.tab-btn.active{background:var(--surface);color:var(--accent)!important;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
 /* drop zone */
 .drop-zone{border:1.5px dashed var(--border2);border-radius:9px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:10px}
 .drop-zone:hover{border-color:var(--accent);background:rgba(124,58,237,.03)}
@@ -108,22 +100,13 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .file-pill button:hover{color:var(--danger)}
 .pill-badge{background:rgba(14,14,14,.07);color:var(--dark);font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;white-space:nowrap}
 /* voice */
-.voice-area{display:flex;flex-direction:column;align-items:center;padding:20px 0 10px;gap:12px}
-.record-btn{width:80px;height:80px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);color:var(--dark);font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s;font-family:var(--font)}
-.record-btn:hover{border-color:var(--danger)}
-.record-btn.recording{border-color:var(--danger);background:rgba(220,38,38,.06);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.2)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
 .rec-icon{font-size:22px}
-.rec-timer{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--danger)}
-.rec-status{font-size:12px;color:var(--muted);text-align:center}
-.transcribed{margin-top:12px}
-.transcribed-label{font-size:10px;color:var(--black);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-weight:700}
 /* generate btn */
 .gen-btn{width:100%;background:var(--accent)!important;border:none;border-radius:9px;color:#fff!important;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,transform .1s}
 .gen-btn:hover{background:var(--accent-dk)!important;transform:translateY(-1px)}
 .gen-btn:active{transform:translateY(0)}
 .gen-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
-.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* error */
 .err-box{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--danger)}
@@ -196,14 +179,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .add-del-btn:hover{border-color:var(--accent);color:var(--accent)}
 .hidden{display:none!important}
 /* progress overlay */
-.gen-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center}
-.gen-overlay.show{display:flex}
-.gen-overlay-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 48px;text-align:center;min-width:320px;box-shadow:0 24px 60px rgba(0,0,0,.2)}
-.gen-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
-.gen-overlay-title{font-size:16px;font-weight:700;color:var(--black);margin-bottom:8px}
-.gen-overlay-step{font-size:13px;color:var(--muted);margin-bottom:20px;min-height:20px}
-.gen-progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.gen-progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .4s ease}
 /* clients */
 .add-client-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);border:none;border-radius:9px;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;padding:12px 20px;cursor:pointer;margin-bottom:20px;transition:background .2s}
 .add-client-btn:hover{background:var(--accent-dk)}
@@ -229,10 +204,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .modal-section-title{font-size:11px;font-weight:700;color:var(--black);text-transform:uppercase;letter-spacing:1.5px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0}
 /* attach/voice */
-.attach-section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;margin-top:4px}
-.attach-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted2);font-size:12px}
-.attach-divider::before,.attach-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.attach-divider span{white-space:nowrap;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
 /* paywall */
 .pw-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px}
 .pw-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.25)}
@@ -310,11 +281,17 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     <button class="nav-btn active" data-page="new"><span class="nav-icon">✦</span> New Estimate</button>
     <button class="nav-btn" data-page="history"><span class="nav-icon">◎</span> History</button>
     <button class="nav-btn" data-page="clients"><span class="nav-icon">👥</span> Clients</button>
+    <button class="nav-btn" data-page="letterhead"><span class="nav-icon">🖼</span> Letterhead</button>
     <button class="nav-btn" data-page="help"><span class="nav-icon">?</span> Help</button>
   </div>
   <div class="theme-toggle" onclick="toggleTheme()">
     <span class="theme-icon" id="themeIcon">☀︎</span>
     <span id="themeLabel">Light mode</span>
+  </div>
+  <div class="color-pick-row" onclick="document.getElementById('accentColorInput').click()" title="Change accent color">
+    <span>Accent color</span>
+    <div class="color-swatch" id="accentSwatch"></div>
+    <input type="color" id="accentColorInput" value="#7C3AED" onchange="applyAccentColor(this.value)">
   </div>
 </nav>
 
@@ -333,17 +310,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       <p>Use AI to generate from a brief, or pick deliverables manually.</p>
     </div>
 
-    <div class="mode-switcher">
-      <button class="mode-btn active" id="modeAI" onclick="switchMode('ai')">
-        <span class="mode-icon">🤖</span>
-        <div><strong>AI Generate</strong><small>Describe project — AI picks deliverables</small></div>
-      </button>
-      <button class="mode-btn" id="modeManual" onclick="switchMode('manual')">
-        <span class="mode-icon">✦</span>
-        <div><strong>Manual Picker</strong><small>Select deliverables and enter costs</small></div>
-      </button>
-    </div>
-
     <div class="two-col">
       <div class="form-col">
 
@@ -352,7 +318,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
           <div class="row-2">
             <div>
               <label>Client</label>
-              <select id="clientName" onchange="onClientChange()"><option value="">Loading…</option></select>
+              <select id="clientName"><option value="">Loading…</option></select>
             </div>
             <div>
               <label>Segment / Division</label>
@@ -406,99 +372,24 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
           </div>
         </div>
 
-        <!-- AI MODE -->
-        <div id="aiMode">
-          <div class="card">
-            <div class="card-title">Project Brief</div>
-            <div class="brief-tabs">
-              <button class="tab-btn active" data-tab="type">✏️ Type</button>
-              <button class="tab-btn" data-tab="attach">📎 Upload &amp; Voice</button>
-            </div>
-            <div class="tab-panel active" id="tab-type">
-              <textarea id="briefText" placeholder="Describe the project — campaign objectives, target audience, deliverables required (eDMs, social posts, videos, banners), languages, adaptations…"></textarea>
-            </div>
-            <div class="tab-panel" id="tab-attach">
-              <div class="attach-section-label">Upload Brief Document</div>
-              <div class="drop-zone" id="briefDropZone" onclick="pickBriefFile()">
-                <div class="drop-icon">📄</div>
-                <div class="drop-label">Click to upload brief</div>
-                <div class="drop-sub">PDF, Word (.docx), or plain text (.txt)</div>
-              </div>
-              <div class="file-pill hidden" id="briefFilePill">
-                <span id="briefFileName"></span>
-                <button onclick="clearBriefFile()">×</button>
-              </div>
-              <div class="attach-divider"><span>and / or</span></div>
-              <div class="attach-section-label">Record Voice Note</div>
-              <div class="voice-area">
-                <button class="record-btn" id="recordBtn" onclick="toggleRecord()">
-                  <span class="rec-icon" id="recIcon">⏺</span>
-                  <span id="recLabel">Tap to Record</span>
-                </button>
-                <div class="rec-timer hidden" id="recTimer">00:00</div>
-                <div class="rec-status" id="recStatus">Tap to start — describe the project out loud</div>
-              </div>
-              <div class="transcribed hidden" id="transcribedBox">
-                <div class="transcribed-label">Transcribed — review and edit before generating</div>
-                <textarea id="transcribedText" rows="5"></textarea>
-              </div>
-            </div>
+        <div class="card">
+          <div class="card-title">Deliverables</div>
+          <div class="del-col-hdr">
+            <span>DELIVERABLE / DESCRIPTION</span><span id="manualCostHdr" style="text-align:right">AED</span><span></span>
           </div>
-
-          <div class="card">
-            <div class="card-title">Historical Estimates <span class="card-sub">(optional — improves accuracy)</span></div>
-            <div class="drop-zone small" id="histDropZone" onclick="pickHistFile()">
-              <div class="drop-icon">📊</div>
-              <div class="drop-label">Upload historical estimates Excel</div>
-              <div class="drop-sub">.xlsx file — each sheet = one past project</div>
-            </div>
-            <div class="file-pill hidden" id="histFilePill">
-              <span id="histFileName"></span>
-              <span id="histSheetCount" class="pill-badge"></span>
-              <button onclick="clearHistFile()">×</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Reference Project <span class="card-sub">(optional)</span></div>
-            <label>Previous project name to reference</label>
-            <input id="refProject" type="text" placeholder="e.g. Brand Campaign 2025">
-            <label>What is different / new in this project</label>
-            <textarea id="diffText" rows="3" placeholder="Describe only what has changed or is new…"></textarea>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Notes</div>
-            <textarea id="notesText" rows="3" placeholder="Any special notes, assumptions, or caveats…"></textarea>
-          </div>
-
-          <div class="err-box hidden" id="errBox"></div>
-          <button class="gen-btn" id="genBtn" onclick="generate()">
-            <span id="genBtnIcon">🤖</span>
-            <span id="genBtnLabel">Generate with AI</span>
-          </button>
+          <div class="del-list" id="manualDelList"></div>
+          <button class="add-del-btn" onclick="addManualRow()">+ Add deliverable</button>
         </div>
 
-        <!-- MANUAL MODE -->
-        <div id="manualMode" class="hidden">
-          <div class="card">
-            <div class="card-title">Deliverables</div>
-            <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Pick a deliverable type and enter the cost. Edit description as needed.</p>
-            <div class="del-col-hdr">
-              <span>DELIVERABLE / DESCRIPTION</span><span id="manualCostHdr" style="text-align:right">AED</span><span></span>
-            </div>
-            <div class="del-list" id="manualDelList"></div>
-            <button class="add-del-btn" onclick="addManualRow()">+ Add deliverable</button>
-          </div>
-          <div class="card">
-            <div class="card-title">Notes</div>
-            <textarea id="manualNotesText" rows="3" placeholder="Any special notes, assumptions, or caveats…"></textarea>
-          </div>
-          <div class="err-box hidden" id="errBoxManual"></div>
-          <button class="gen-btn" onclick="generateManual()">
-            <span>✦</span><span>Build Estimate</span>
-          </button>
+        <div class="card">
+          <div class="card-title">Notes</div>
+          <textarea id="manualNotesText" rows="3" placeholder="Any special notes, assumptions, or caveats…"></textarea>
         </div>
+
+        <div class="err-box hidden" id="errBoxManual"></div>
+        <button class="gen-btn" onclick="generateManual()">
+          <span>✦</span><span>Build Estimate</span>
+        </button>
 
       </div>
 
@@ -602,6 +493,35 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     </div>
   </div>
 
+  <!-- LETTERHEAD PAGE -->
+  <div class="page" id="page-letterhead">
+    <div class="page-header">
+      <h1>Letterhead</h1>
+      <p>Upload your company letterhead — it appears at the top of all PDF downloads.</p>
+    </div>
+    <div style="max-width:580px;display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="card-title">Upload Letterhead Image</div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Upload a PNG or JPG of your letterhead (ideally the top portion of your company stationery — full width, landscape or horizontal format works best).</p>
+        <div class="lh-zone" id="lhZonePage" onclick="pickLetterheadPage()">
+          <div class="drop-icon">🖼</div>
+          <div class="drop-label" style="font-size:13px;color:var(--muted);margin-top:4px">Click to upload letterhead</div>
+          <div class="drop-sub" style="font-size:11px;color:var(--muted2);margin-top:4px">PNG or JPG · Recommended: full-width horizontal image</div>
+        </div>
+        <img id="lhPreviewPage" style="width:100%;max-height:120px;object-fit:contain;border-radius:8px;border:1px solid var(--border);margin-top:10px;display:none" alt="Letterhead preview">
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button id="lhClearPageBtn" class="secondary-btn" style="display:none;color:var(--danger);border-color:var(--danger)" onclick="clearLetterheadPage()">Remove letterhead</button>
+        </div>
+        <div id="lhPageStatus" style="font-size:12px;color:var(--success);margin-top:8px;min-height:16px"></div>
+      </div>
+      <div class="card" style="background:var(--accent-lt);border-color:#c4b5fd">
+        <div style="font-size:12px;color:var(--dark);line-height:1.7">
+          💡 The letterhead image is saved to your workspace and used automatically when you click <strong>Download PDF</strong> on any estimate. It won't appear in Excel downloads.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- HELP PAGE -->
   <div class="page" id="page-help">
     <div class="page-header">
@@ -612,38 +532,28 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       <div class="help-section">
         <h2>Getting Started</h2>
         <div class="help-steps">
-          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Set your workspace</strong> — on first visit, enter your company name. This keeps all your data (clients, history, estimates) private to your workspace.</div></div>
-          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Add a client</strong> — go to the Clients tab and click "Add New Client". Optionally upload historical estimate Excel files to improve AI accuracy.</div></div>
-          <div class="help-step"><div class="help-num">3</div><div class="help-text"><strong>Upload your letterhead</strong> — click the Estimix logo 5 times to open Settings, then upload your company letterhead image.</div></div>
+          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Set your workspace</strong> — on first visit, enter your company name. This keeps all your data (clients and estimates) private to your workspace.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Add a client</strong> — go to the Clients tab and click "Add New Client".</div></div>
+          <div class="help-step"><div class="help-num">3</div><div class="help-text"><strong>Upload your letterhead</strong> — go to the Letterhead tab and upload your company letterhead image. It will appear at the top of every PDF you download.</div></div>
         </div>
       </div>
       <div class="help-section">
         <h2>Creating an Estimate</h2>
         <div class="help-steps">
-          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Fill in Project Details</strong> — choose a client, add a project name, set the currency and tax rate that apply.</div></div>
-          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Choose your mode:</strong><br>
-            • <strong>AI Generate</strong> — describe the project in the brief box (or upload a brief document / record your voice). Click "Generate with AI" and the AI writes the deliverable list and estimates costs.<br>
-            • <strong>Manual Picker</strong> — add deliverables one by one. Type the deliverable name and enter the cost yourself.
-          </div></div>
-          <div class="help-step"><div class="help-num">3</div><div class="help-text"><strong>Review the preview</strong> — the right panel shows a live estimate with subtotal, tax, and grand total.</div></div>
-          <div class="help-step"><div class="help-num">4</div><div class="help-text"><strong>Download</strong> — click <strong>Download Excel</strong> for a spreadsheet, or <strong>Download PDF</strong> for a branded PDF with your letterhead.</div></div>
+          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Fill in Project Details</strong> — choose a client, add a project name, reference number, currency, and tax rate.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Add deliverables</strong> — type each deliverable name and enter its cost. Click "+ Add Deliverable" to add more rows. The preview updates live as you type.</div></div>
+          <div class="help-step"><div class="help-num">3</div><div class="help-text"><strong>Add notes</strong> — any payment terms, assumptions, or remarks go in the Notes field and appear on the PDF.</div></div>
+          <div class="help-step"><div class="help-num">4</div><div class="help-text"><strong>Build &amp; Download</strong> — click <strong>Build Estimate</strong> to lock in the totals, then download as <strong>Excel</strong> or <strong>PDF</strong>. The PDF includes your letterhead.</div></div>
         </div>
-        <div class="help-tip">💡 <strong>AI tip:</strong> The more detail you include in the brief — deliverable types, languages, formats, target audience — the more accurate the AI estimate. Upload historical Excel files under each client to give the AI real pricing context.</div>
-      </div>
-      <div class="help-section">
-        <h2>Clients Tab</h2>
-        <div class="help-steps">
-          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Add clients</strong> with their name. Each client has their own historical estimate data.</div></div>
-          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Upload historical estimates</strong> — an Excel file where each sheet is one past project. The AI uses this to match your real pricing patterns.</div></div>
-        </div>
+        <div class="help-tip">💡 <strong>Tip:</strong> Set your accent color using the color swatch in the sidebar — this also changes the PDF title bar color to match your brand.</div>
       </div>
       <div class="help-section">
         <h2>Workspace &amp; Sharing</h2>
         <div class="help-steps">
-          <div class="help-step"><div class="help-num">1</div><div class="help-text">All data is stored in your browser under your workspace. Open Settings (5× logo click) to see your <strong>workspace code</strong>.</div></div>
-          <div class="help-step"><div class="help-num">2</div><div class="help-text">To use the same workspace on another device or browser — open Settings and enter the workspace code using <em>"Already have a workspace code?"</em> on the setup screen.</div></div>
+          <div class="help-step"><div class="help-num">1</div><div class="help-text">All data is stored in your browser under your workspace. Click the Estimix logo 5 times to open Settings and see your <strong>workspace code</strong>.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text">To use the same workspace on another device or browser — on the setup screen, click <em>"Already have a workspace code?"</em> and enter your code.</div></div>
         </div>
-        <div class="help-tip">💡 <strong>AI Settings:</strong> The AI requires Ollama running locally. Install from <a href="https://ollama.com" target="_blank" style="color:var(--accent)">ollama.com</a>, run <code style="background:var(--bg);padding:1px 5px;border-radius:4px">ollama pull llama3</code> then <code style="background:var(--bg);padding:1px 5px;border-radius:4px">ollama serve</code>. Configure the URL and model in Settings.</div>
+        <div class="help-tip">💡 <strong>Free plan:</strong> You get 3 free estimates. Upgrade to Pro for unlimited estimates — click <strong>Upgrade to Pro</strong> in the banner when you hit the limit.</div>
       </div>
     </div>
   </div>
@@ -659,15 +569,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 
 </main>
 
-<!-- Generation overlay -->
-<div class="gen-overlay" id="genOverlay">
-  <div class="gen-overlay-box">
-    <div class="gen-spinner"></div>
-    <div class="gen-overlay-title">Generating Estimate…</div>
-    <div class="gen-overlay-step" id="genOverlayStep">Reading project brief…</div>
-    <div class="gen-progress-bar"><div class="gen-progress-fill" id="genProgressFill"></div></div>
-  </div>
-</div>
 
 <!-- Paywall modal -->
 <div class="pw-modal" id="paywallModal" style="display:none">
@@ -729,7 +630,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   </div>
 </div>
 
-<!-- Hidden AI Settings Modal (click logo 5×) -->
+<!-- Hidden Settings Modal (click logo 5×) -->
 <div class="hs-modal" id="hsModal">
   <div class="hs-box">
     <div class="hs-header">
@@ -745,30 +646,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       </div>
       <button class="test-btn" style="margin:0;font-size:11px;padding:6px 12px;white-space:nowrap" onclick="switchWorkspace()">Switch →</button>
     </div>
-    <label>Ollama URL</label>
-    <input id="ollamaUrl" type="text" value="http://localhost:11434">
-    <label>Model</label>
-    <select id="modelSelect">
-      <option value="llama3">llama3 (recommended)</option>
-      <option value="llama3.1">llama3.1</option>
-      <option value="mistral">mistral</option>
-      <option value="phi3">phi3 (lightweight)</option>
-      <option value="gemma2">gemma2</option>
-    </select>
-    <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
-      <button class="test-btn" style="margin-top:0" onclick="testOllamaConn()">Test Connection</button>
-      <button class="test-btn" style="margin-top:0;background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveHiddenSettings()">Save & Close</button>
-    </div>
-    <div class="test-result hidden" id="testResult"></div>
-    <div style="margin-top:14px">
-      <label style="text-transform:uppercase;font-size:10px;letter-spacing:1px;font-weight:700;color:var(--muted)">Company Letterhead</label>
-      <div class="lh-zone" id="lhZone" onclick="pickLetterhead()">
-        <div style="font-size:11px;color:var(--muted)">Click to upload letterhead image (PNG, JPG)</div>
-        <div style="font-size:10px;color:var(--muted2);margin-top:3px">Used in PDF downloads — full width at top of document</div>
-      </div>
-      <img id="lhPreview" class="lh-preview" alt="Letterhead preview">
-      <button id="lhClearBtn" class="test-btn" style="margin-top:6px;font-size:11px;display:none;color:var(--danger);border-color:var(--danger)" onclick="clearLetterhead()">Remove letterhead</button>
-    </div>
+    <button class="test-btn" style="margin-top:0;width:100%;background:var(--accent);color:#fff;border-color:var(--accent)" onclick="closeHiddenSettings()">Close</button>
     <div class="card" style="margin-top:14px;padding:14px 16px">
       <div class="card-title" style="font-size:11px;margin-bottom:8px">Restore Pro Access</div>
       <div style="display:flex;gap:8px">
@@ -921,57 +799,28 @@ async function restoreAccess(){
 
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let histProjects=[], currentEstimate=null, recInterval=null, recSeconds=0;
-let _recognition=null, _isRecording=false, _transcriptParts=[];
+let currentEstimate=null;
 let _allClients=[], _editingClientId=null, _clientExcelData=null;
 
-// ─── Progress ─────────────────────────────────────────────────────────────────
-const STEPS=[[10,'Reading project brief…'],[25,'Loading client rate card…'],[40,'Sending to AI model…'],[65,'AI generating estimate…'],[85,'Running sanity check…'],[95,'Finalising…']];
-let _progressTimer=null, _stepIdx=0;
-function showProgress(){
-  const o=document.getElementById('genOverlay');o.classList.add('show');
-  _stepIdx=0;setProgressStep(0);
-  _progressTimer=setInterval(()=>{if(_stepIdx<STEPS.length-1){_stepIdx++;setProgressStep(_stepIdx)}},2200);
+// ─── Accent color ─────────────────────────────────────────────────────────────
+function shadeHex(hex,amt){
+  const n=parseInt(hex.replace('#',''),16);
+  const r=Math.min(255,Math.max(0,(n>>16)+amt));
+  const g=Math.min(255,Math.max(0,((n>>8)&0xff)+amt));
+  const b=Math.min(255,Math.max(0,(n&0xff)+amt));
+  return'#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);
 }
-function setProgressStep(i){
-  const[p,l]=STEPS[i]||[95,'Almost done…'];
-  document.getElementById('genProgressFill').style.width=p+'%';
-  document.getElementById('genOverlayStep').textContent=l;
+function hexToRgba(hex,a){
+  const n=parseInt(hex.replace('#',''),16);
+  return`rgba(${n>>16},${(n>>8)&0xff},${n&0xff},${a})`;
 }
-function hideProgress(){
-  clearInterval(_progressTimer);
-  document.getElementById('genProgressFill').style.width='100%';
-  document.getElementById('genOverlayStep').textContent='Done!';
-  setTimeout(()=>{document.getElementById('genOverlay').classList.remove('show');document.getElementById('genProgressFill').style.width='0%'},600);
-}
-
-// ─── Ollama ───────────────────────────────────────────────────────────────────
-function getOllamaUrl(){return(document.getElementById('ollamaUrl').value||'http://localhost:11434').replace(/\/$/,'')}
-async function ollamaStatus(){
-  try{
-    const r=await fetch(getOllamaUrl()+'/api/tags',{signal:AbortSignal.timeout(4000)});
-    if(!r.ok)return{running:false,models:[]};
-    const d=await r.json();
-    return{running:true,models:(d.models||[]).map(m=>m.name)};
-  }catch{return{running:false,models:[]}}
-}
-async function testOllamaConn(){
-  const box=document.getElementById('testResult');
-  box.className='test-result';box.textContent='Testing…';box.classList.remove('hidden');
-  const res=await ollamaStatus();
-  box.className=res.running?'test-result ok':'test-result fail';
-  box.textContent=res.running?'✓ Connected. Models: '+(res.models.join(', ')||'none pulled yet'):'✗ Ollama not running. Run "ollama serve" in Terminal.';
-}
-async function callOllama(prompt,model,temperature=0.15,numPredict=3000){
-  const r=await fetch(getOllamaUrl()+'/api/generate',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model,prompt,stream:false,options:{temperature,num_predict:numPredict}}),
-    signal:AbortSignal.timeout(240000)
-  });
-  if(!r.ok)throw new Error('Ollama error: '+r.status);
-  const d=await r.json();
-  return d.response||'';
+function applyAccentColor(hex){
+  document.documentElement.style.setProperty('--accent',hex);
+  document.documentElement.style.setProperty('--accent-dk',shadeHex(hex,-20));
+  document.documentElement.style.setProperty('--accent-lt',hexToRgba(hex,0.1));
+  const sw=document.getElementById('accentSwatch');if(sw)sw.style.background=hex;
+  const inp=document.getElementById('accentColorInput');if(inp)inp.value=hex;
+  localStorage.setItem('estimix_accent_color',hex);
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -997,22 +846,6 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ─── Mode switching ───────────────────────────────────────────────────────────
-function switchMode(mode){
-  document.getElementById('modeAI').classList.toggle('active',mode==='ai');
-  document.getElementById('modeManual').classList.toggle('active',mode==='manual');
-  if(mode==='manual'){
-    document.getElementById('aiMode').classList.add('hidden');
-    document.getElementById('manualMode').classList.remove('hidden');
-    const list=document.getElementById('manualDelList');
-    if(list&&list.children.length===0){addManualRow(0);addManualRow(1);addManualRow(10)}
-  }else{
-    document.getElementById('manualMode').classList.add('hidden');
-    document.getElementById('aiMode').classList.remove('hidden');
-  }
-  resetPreview();
-}
-
 // ─── File input helpers ───────────────────────────────────────────────────────
 function triggerFileInput(accept,cb){
   const inp=document.createElement('input');
@@ -1021,129 +854,6 @@ function triggerFileInput(accept,cb){
   inp.click();
 }
 
-// ─── Historical Excel ─────────────────────────────────────────────────────────
-function pickHistFile(){
-  triggerFileInput('.xlsx,.xls',async file=>{
-    try{
-      const ab=await file.arrayBuffer();
-      const wb=XLSX.read(ab);
-      const projects=[];
-      wb.SheetNames.forEach(name=>{
-        const ws=wb.Sheets[name];
-        const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-        const items=[];
-        let dCol=0,cCol=1;
-        for(let i=0;i<Math.min(3,rows.length);i++){
-          (rows[i]||[]).forEach((cell,j)=>{
-            const s=String(cell||'').toLowerCase();
-            if(s.includes('desc')||s.includes('deliver')||s.includes('item'))dCol=j;
-            if(s.includes('cost')||s.includes('aed')||s.includes('amount'))cCol=j;
-          });
-        }
-        rows.forEach((row,i)=>{
-          if(i===0)return;
-          const desc=String(row[dCol]||'').trim();
-          const cost=parseFloat(String(row[cCol]||'').replace(/[^\d.]/g,''))||0;
-          if(desc&&cost>0)items.push({description:desc,cost});
-        });
-        if(items.length>0)projects.push({project:name,items});
-      });
-      histProjects=projects;
-      document.getElementById('histDropZone').style.display='none';
-      document.getElementById('histFilePill').classList.remove('hidden');
-      document.getElementById('histFileName').textContent=file.name;
-      document.getElementById('histSheetCount').textContent=projects.length+' projects';
-    }catch(e){showErr('Could not read Excel: '+e)}
-  });
-}
-function clearHistFile(){
-  histProjects=[];
-  document.getElementById('histDropZone').style.display='';
-  document.getElementById('histFilePill').classList.add('hidden');
-}
-
-// ─── Brief file ───────────────────────────────────────────────────────────────
-function pickBriefFile(){
-  triggerFileInput('.pdf,.docx,.doc,.txt',async file=>{
-    try{
-      let text='';
-      const ext=file.name.split('.').pop().toLowerCase();
-      if(ext==='txt'){
-        text=await file.text();
-      }else if(ext==='docx'||ext==='doc'){
-        const ab=await file.arrayBuffer();
-        const r=await mammoth.extractRawText({arrayBuffer:ab});
-        text=r.value||'';
-      }else if(ext==='pdf'){
-        text='[PDF uploaded: '+file.name+']\n\nPlease describe the brief in the text area above, or paste the key content here.';
-      }else{
-        text=await file.text();
-      }
-      document.getElementById('briefDropZone').style.display='none';
-      document.getElementById('briefFilePill').classList.remove('hidden');
-      document.getElementById('briefFileName').textContent=file.name;
-      document.getElementById('briefText').value=text;
-    }catch(e){showErr('Could not read file: '+e)}
-  });
-}
-function clearBriefFile(){
-  document.getElementById('briefDropZone').style.display='';
-  document.getElementById('briefFilePill').classList.add('hidden');
-}
-
-// ─── Voice recording ──────────────────────────────────────────────────────────
-function toggleRecord(){
-  if(_isRecording&&_recognition){_recognition.stop()}
-  else{startVoiceRecording()}
-}
-function startVoiceRecording(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){document.getElementById('recStatus').textContent='Voice not supported — use Chrome or Edge.';return}
-  const btn=document.getElementById('recordBtn'),status=document.getElementById('recStatus');
-  const timer=document.getElementById('recTimer'),icon=document.getElementById('recIcon');
-  _recognition=new SR();_recognition.continuous=true;_recognition.interimResults=false;_recognition.lang='en-US';
-  _transcriptParts=[];
-  _recognition.onstart=()=>{
-    _isRecording=true;btn.classList.add('recording');
-    if(icon)icon.textContent='⏹';document.getElementById('recLabel').textContent='Tap to Stop';
-    timer.classList.remove('hidden');status.textContent='Recording — speak clearly, tap Stop when done';
-    recSeconds=0;recInterval=setInterval(()=>{recSeconds++;const m=String(Math.floor(recSeconds/60)).padStart(2,'0'),s=String(recSeconds%60).padStart(2,'0');timer.textContent=m+':'+s},1000);
-  };
-  _recognition.onresult=e=>{
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal)_transcriptParts.push(e.results[i][0].transcript);
-    }
-  };
-  _recognition.onend=()=>{
-    _isRecording=false;clearInterval(recInterval);
-    btn.classList.remove('recording');if(icon)icon.textContent='⏺';
-    document.getElementById('recLabel').textContent='Tap to Record';timer.classList.add('hidden');
-    const text=_transcriptParts.join(' ').trim();
-    if(text){showTranscription(text)}
-    else{status.textContent='No speech detected — try again or type your brief.'}
-  };
-  _recognition.onerror=e=>{
-    _isRecording=false;clearInterval(recInterval);btn.classList.remove('recording');
-    if(icon)icon.textContent='⏺';document.getElementById('recLabel').textContent='Tap to Record';
-    document.getElementById('recStatus').textContent=e.error==='not-allowed'?'Microphone access denied — allow in browser settings.':'Recording error — try again.';
-  };
-  _recognition.start();
-}
-function showTranscription(text){
-  document.getElementById('transcribedBox').classList.remove('hidden');
-  document.getElementById('transcribedText').value=text;
-  document.getElementById('recStatus').textContent='✓ Done — review and edit below';
-  document.getElementById('briefText').value=text;
-}
-
-// ─── Brief helper ─────────────────────────────────────────────────────────────
-function getActiveBrief(){
-  const tab=document.querySelector('.tab-btn.active')?.dataset.tab||'type';
-  let brief=tab==='attach'?(document.getElementById('transcribedText').value||document.getElementById('briefText').value).trim():document.getElementById('briefText').value.trim();
-  const diff=(document.getElementById('diffText').value||'').trim();
-  if(diff)brief+='\n\nWHAT IS DIFFERENT / NEW:\n'+diff;
-  return brief;
-}
 
 // ─── Client helpers ───────────────────────────────────────────────────────────
 function loadClientsFromStorage(){return JSON.parse(localStorage.getItem(wsk('clients'))||'[]')}
@@ -1155,20 +865,7 @@ function getSelectedClientName(){
   return c?c.name:'General';
 }
 function onClientChange(){
-  const sel=document.getElementById('clientName');
-  const id=sel?sel.value:'';
-  const c=_allClients.find(x=>x.id===id);
-  if(c&&(c.historyProjects||[]).length>0){
-    histProjects=c.historyProjects;
-    document.getElementById('histFileName').textContent=c.name+' historical data';
-    document.getElementById('histSheetCount').textContent=c.historyProjects.length+' projects';
-    document.getElementById('histFilePill').classList.remove('hidden');
-    document.getElementById('histDropZone').style.display='none';
-  }else{
-    histProjects=[];
-    document.getElementById('histFilePill').classList.add('hidden');
-    document.getElementById('histDropZone').style.display='';
-  }
+  histProjects=[];
 }
 function loadClientsIntoSelector(){
   _allClients=loadClientsFromStorage();
@@ -1183,144 +880,6 @@ function loadClientsIntoSelector(){
   onClientChange();
 }
 
-// ─── Prompt builder ───────────────────────────────────────────────────────────
-function buildPrompt(payload){
-  const{projectName,clientName,brief,historicalProjects,referenceProject}=payload;
-  const curr=getCurrSym();
-  let history='';
-  (historicalProjects||[]).slice(0,5).forEach(p=>{
-    const lines=(p.items||[]).slice(0,10).map(i=>`  - ${i.description}: ${curr} ${i.cost}`).join('\n');
-    history+=`\nProject: ${p.project||p.projectName||'Past project'}\n${lines}\n`;
-  });
-  let refSection='';
-  if(referenceProject){
-    const ref=(historicalProjects||[]).find(p=>(p.project||p.projectName||'').toLowerCase().includes(referenceProject.toLowerCase()));
-    if(ref){
-      refSection=`\n\nREFERENCE PROJECT — carry these items forward unless the brief says otherwise:\n`;
-      (ref.items||[]).forEach(i=>{refSection+=`  - ${i.description}: ${curr} ${i.cost}\n`});
-      refSection+='\nAdapt descriptions and costs to the new brief. New deliverables take priority.';
-    }
-  }
-  return`You are a senior creative agency estimator working on a project for ${clientName}.
-Produce a detailed itemised estimate. Currency: ${curr}
-
-HISTORICAL CONTEXT (use as pricing reference):
-${history||'(none provided)'}
-${refSection}
-
-RULES — CRITICAL:
-1. Output one line per deliverable sub-item using this exact pipe format:
-   ITEM | deliverable name | specific description | cost
-2. Be specific — name each deliverable clearly (e.g. "eDM Design – English", "Landing Page Copywriting")
-3. English and Arabic versions are always separate line items
-4. Design and copywriting are always separate line items — never combine them
-5. Cost must be a realistic number in ${curr} — no zeros, no placeholders
-6. Do NOT output totals, section headers, or any text other than ITEM lines
-
-EXAMPLE FORMAT:
-ITEM | eDM Design (English) | Full design and layout of the eDM including hero, offer section, and CTA. English version. | 1500
-ITEM | eDM Copywriting (English) | English headline, body copy, offer details, and CTA for the eDM. | 800
-ITEM | Social Post Design (Vertical) | Vertical social post design with campaign visuals and brand elements. | 600
-
-PROJECT BRIEF:
-${brief}
-
-List all deliverables now:`;
-}
-function parsePipeResponse(text){
-  const items=[];
-  text.split('\n').forEach(line=>{
-    line=line.trim();
-    if(!line.toUpperCase().startsWith('ITEM'))return;
-    const parts=line.split('|').map(p=>p.trim());
-    if(parts.length<3)return;
-    const name=parts[1]||'';
-    const detail=parts.length>=4?parts[2]:'';
-    const costStr=parts.length>=4?parts[3]:parts[2];
-    const cost=parseFloat(String(costStr).replace(/[^\d.]/g,''))||0;
-    if(!name||cost<=0)return;
-    items.push({description:name,detail,cost});
-  });
-  return items;
-}
-async function runSanityCheck(items,brief,model,clientName){
-  if(!items.length)return[];
-  const itemsText=items.map(i=>`  - ${i.description}: ${getCurrSym()} ${i.cost}`).join('\n');
-  const prompt=`Review this estimate for the brief below.
-
-BRIEF (summary):
-${brief.slice(0,500)}
-
-ESTIMATE:
-${itemsText}
-
-Check for: wrong costs, duplicate items, obvious missing deliverables.
-Respond ONLY with lines in this format: ISSUE | item name | problem
-If no issues, respond with exactly: OK
-
-Begin:`;
-  try{
-    const res=await callOllama(prompt,model,0.1,500);
-    if(res.trim()==='OK'||!res.trim())return[];
-    const issues=[];
-    res.split('\n').forEach(line=>{
-      line=line.trim();
-      if(line.toUpperCase().startsWith('ISSUE')){
-        const p=line.split('|');
-        if(p.length>=3)issues.push({item:p[1].trim(),problem:p[2].trim()});
-      }
-    });
-    return issues;
-  }catch{return[]}
-}
-
-// ─── AI Generate ──────────────────────────────────────────────────────────────
-async function generate(){
-  clearErr();
-  if(!isPro()&&getUses()>=FREE_LIMIT){showPaywall();return}
-  const projName=document.getElementById('projName').value.trim();
-  const clientName=getSelectedClientName();
-  const clientSeg=document.getElementById('clientSeg').value.trim();
-  const estRef=document.getElementById('estRef').value.trim();
-  const status=document.getElementById('estStatus').value;
-  const notes=document.getElementById('notesText').value.trim();
-  const brief=getActiveBrief();
-  if(!projName){showErr('Please enter a project name.');return}
-  if(!brief){showErr('Please provide a project brief.');return}
-  const os=await ollamaStatus();
-  if(!os.running){showErr('Ollama is not running. Open Terminal and run: ollama serve');return}
-  const model=document.getElementById('modelSelect').value;
-  setGenerating(true);showProgress();
-  try{
-    const refProject=(document.getElementById('refProject').value||'').trim();
-    const prompt=buildPrompt({projectName:projName,clientName,brief,historicalProjects:histProjects,referenceProject:refProject});
-    const raw=await callOllama(prompt,model);
-    let items=parsePipeResponse(raw);
-    if(!items.length){showErr('AI returned no items. Try a more detailed brief, or check your Ollama model is loaded.');setGenerating(false);hideProgress();return}
-    const issues=await runSanityCheck(items,brief,model,clientName);
-    const subtotal=items.reduce((s,i)=>s+i.cost,0);
-    const taxRate=getTaxRate();
-    const vat=Math.round(subtotal*taxRate*100)/100;
-    const grand=Math.round((subtotal+vat)*100)/100;
-    currentEstimate={projName,clientName,clientSeg,estRef,status,items,notes,subtotal,vat,grand};
-    showPreview(currentEstimate);showSanityIssues(issues);
-    incrementUses();updateBanner();
-    saveHistoryItem({id:Date.now().toString(),projectName:projName,clientSegment:clientSeg,clientName,estimateRef:estRef,itemCount:items.length,grand,createdAt:new Date().toISOString()});
-  }catch(e){showErr('Generation failed: '+e)}
-  finally{setGenerating(false);hideProgress()}
-}
-function setGenerating(on){
-  const btn=document.getElementById('genBtn');
-  btn.disabled=on;
-  if(on){
-    document.getElementById('genBtnIcon').outerHTML='<span class="spinner" id="genBtnIcon"></span>';
-    document.getElementById('genBtnLabel').textContent='Generating…';
-  }else{
-    const icon=document.getElementById('genBtnIcon');
-    if(icon)icon.outerHTML='<span id="genBtnIcon">🤖</span>';
-    document.getElementById('genBtnLabel').textContent='Generate with AI';
-  }
-}
 
 // ─── Manual generate ──────────────────────────────────────────────────────────
 async function generateManual(){
@@ -1543,29 +1102,29 @@ function deleteClient(id,name){
 }
 
 // ─── Letterhead ───────────────────────────────────────────────────────────────
-function pickLetterhead(){
+function pickLetterheadPage(){
   triggerFileInput('image/png,image/jpeg,image/jpg',file=>{
     const reader=new FileReader();
-    reader.onload=e=>{
-      const data=e.target.result;
+    reader.onload=ev=>{
+      const data=ev.target.result;
       localStorage.setItem(wsk('letterhead'),data);
-      showLetterheadPreview(data);
+      showLetterheadPreviewPage(data);
     };
     reader.readAsDataURL(file);
   });
 }
-function clearLetterhead(){
+function clearLetterheadPage(){
   localStorage.removeItem(wsk('letterhead'));
-  const prev=document.getElementById('lhPreview');const btn=document.getElementById('lhClearBtn');
+  const prev=document.getElementById('lhPreviewPage');const btn=document.getElementById('lhClearPageBtn');
   if(prev){prev.style.display='none';prev.src=''}
   if(btn)btn.style.display='none';
-  document.getElementById('lhZone').style.display='';
+  document.getElementById('lhZonePage').style.display='';
 }
-function showLetterheadPreview(data){
-  const prev=document.getElementById('lhPreview');const btn=document.getElementById('lhClearBtn');
+function showLetterheadPreviewPage(data){
+  const prev=document.getElementById('lhPreviewPage');const btn=document.getElementById('lhClearPageBtn');
   if(prev){prev.src=data;prev.style.display='block'}
   if(btn)btn.style.display='block';
-  document.getElementById('lhZone').style.display='none';
+  document.getElementById('lhZonePage').style.display='none';
 }
 
 // ─── Download PDF ─────────────────────────────────────────────────────────────
@@ -1677,41 +1236,21 @@ document.querySelector('.logo').addEventListener('click',()=>{
   else{_logoTimer=setTimeout(()=>{_logoClicks=0},2000);}
 });
 function openHiddenSettings(){
-  const saved=localStorage.getItem('estimix_ollama_url');
-  const savedModel=localStorage.getItem('estimix_ollama_model');
-  if(saved)document.getElementById('ollamaUrl').value=saved;
-  if(savedModel)document.getElementById('modelSelect').value=savedModel;
   const hn=document.getElementById('hsWsName');const hc=document.getElementById('hsWsCode');
   if(hn)hn.textContent=getWsName()||'—';
   if(hc)hc.textContent=getWsId()?`code: ${getWsId()}`:'';
-  const lhSaved=localStorage.getItem(wsk('letterhead'));
-  if(lhSaved){showLetterheadPreview(lhSaved)}
-  else{
-    const prev=document.getElementById('lhPreview');const btn=document.getElementById('lhClearBtn');
-    if(prev){prev.style.display='none';prev.src=''}
-    if(btn)btn.style.display='none';
-    const zone=document.getElementById('lhZone');if(zone)zone.style.display='';
-  }
   document.getElementById('hsModal').classList.add('show');
 }
 function closeHiddenSettings(){document.getElementById('hsModal').classList.remove('show')}
-function saveHiddenSettings(){
-  localStorage.setItem('estimix_ollama_url',document.getElementById('ollamaUrl').value);
-  localStorage.setItem('estimix_ollama_model',document.getElementById('modelSelect').value);
-  closeHiddenSettings();
-}
+function saveHiddenSettings(){closeHiddenSettings()}
 
 document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem('theme');
   const dark=saved==='dark'||(saved===null&&window.matchMedia('(prefers-color-scheme: dark)').matches);
   if(dark){document.body.classList.add('dark');document.getElementById('themeIcon').textContent='☾';document.getElementById('themeLabel').textContent='Dark mode'}
-  // restore saved Ollama settings
-  const savedUrl=localStorage.getItem('estimix_ollama_url');
-  const savedMdl=localStorage.getItem('estimix_ollama_model');
-  if(savedUrl)document.getElementById('ollamaUrl').value=savedUrl;
-  if(savedMdl)document.getElementById('modelSelect').value=savedMdl;
-  document.getElementById('aiMode').classList.remove('hidden');
-  document.getElementById('manualMode').classList.add('hidden');
+  // restore accent color
+  const savedAccent=localStorage.getItem('estimix_accent_color');
+  if(savedAccent)applyAccentColor(savedAccent);
   // workspace check
   if(!getWsId()){
     document.getElementById('wsModal').classList.add('show');
@@ -1720,6 +1259,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(tag){tag.textContent=getWsName()||getWsId();tag.style.display='inline-block'}
     loadClientsIntoSelector();updateBanner();
   }
+  // restore letterhead on letterhead page
+  const lhSaved=localStorage.getItem(wsk('letterhead'));
+  if(lhSaved)showLetterheadPreviewPage(lhSaved);
 });
 </script>
 </body>
