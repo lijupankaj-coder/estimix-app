@@ -263,6 +263,15 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .pw-divider{display:flex;align-items:center;gap:10px;margin:18px 0 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .pw-divider::before,.pw-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 #keyMsg{font-size:12px;margin-top:8px;text-align:center;min-height:18px}
+/* hidden settings panel */
+.hs-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:3000;display:none;align-items:center;justify-content:center;padding:24px}
+.hs-modal.show{display:flex}
+.hs-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;padding:28px 28px 20px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.hs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.hs-title{font-size:15px;font-weight:800;color:var(--black)}
+.hs-close{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:2px 8px;line-height:1;border-radius:6px}
+.hs-close:hover{color:var(--danger)}
+.hs-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
 /* footer */
 .app-footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:600}
 .app-footer a{color:var(--accent);text-decoration:none}
@@ -281,7 +290,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     <button class="nav-btn active" data-page="new"><span class="nav-icon">✦</span> New Estimate</button>
     <button class="nav-btn" data-page="history"><span class="nav-icon">◎</span> History</button>
     <button class="nav-btn" data-page="clients"><span class="nav-icon">👥</span> Clients</button>
-    <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙</span> Settings</button>
   </div>
   <div class="theme-toggle" onclick="toggleTheme()">
     <span class="theme-icon" id="themeIcon">☀︎</span>
@@ -551,50 +559,6 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   </div>
 
   <!-- SETTINGS PAGE -->
-  <div class="page" id="page-settings">
-    <div class="page-header">
-      <h1>Settings</h1>
-      <p>Configure the AI model and preferences.</p>
-    </div>
-    <div class="card" style="max-width:560px">
-      <div class="card-title">Ollama Configuration</div>
-      <label>Ollama URL</label>
-      <input id="ollamaUrl" type="text" value="http://localhost:11434">
-      <label>Model</label>
-      <select id="modelSelect">
-        <option value="llama3">llama3 (recommended)</option>
-        <option value="llama3.1">llama3.1</option>
-        <option value="mistral">mistral</option>
-        <option value="phi3">phi3 (lightweight)</option>
-        <option value="gemma2">gemma2</option>
-      </select>
-      <button class="test-btn" onclick="testOllamaConn()">Test Connection</button>
-      <div class="test-result hidden" id="testResult"></div>
-    </div>
-    <div class="card" style="max-width:560px;margin-top:16px">
-      <div class="card-title">About</div>
-      <p style="color:var(--muted);font-size:13px;line-height:1.7">
-        Estimix v1.0 by Nebulix<br>
-        Generates estimates using your local Ollama AI model.<br>
-        All data stored locally in your browser.<br><br>
-        <strong style="color:var(--accent)">Setup required:</strong><br>
-        1. Install Ollama from <a href="https://ollama.com" target="_blank" style="color:var(--accent)">ollama.com</a><br>
-        2. Run: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">ollama pull llama3</code><br>
-        3. Start: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">ollama serve</code><br><br>
-        <strong style="color:var(--muted)">Note:</strong> localhost requests work from any origin in modern browsers. If using a remote Ollama URL, ensure CORS is enabled via <code style="background:var(--bg);padding:2px 6px;border-radius:4px">OLLAMA_ORIGINS=*</code>.
-      </p>
-    </div>
-    <div class="card" style="max-width:560px;margin-top:16px">
-      <div class="card-title">My Access</div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">If you've purchased Estimix Pro, enter your email to restore access.</p>
-      <div style="display:flex;gap:8px">
-        <input type="email" id="restoreEmail" placeholder="your@email.com" style="margin:0;flex:1">
-        <button class="test-btn" style="margin-top:0;white-space:nowrap" onclick="restoreAccess()">Check Access</button>
-      </div>
-      <div id="restoreMsg" style="font-size:12px;margin-top:8px;min-height:18px"></div>
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer class="app-footer">
     <span>© 2026 Nebulix | All rights reserved.</span>
@@ -652,6 +616,40 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       <div style="text-align:center;margin-top:16px">
         <button onclick="closePaywall()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline">Maybe later</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden AI Settings Modal (click logo 5×) -->
+<div class="hs-modal" id="hsModal">
+  <div class="hs-box">
+    <div class="hs-header">
+      <div class="hs-title">⚙ AI Configuration</div>
+      <button class="hs-close" onclick="closeHiddenSettings()">×</button>
+    </div>
+    <div class="hs-sub">Internal settings — not visible to users.</div>
+    <label>Ollama URL</label>
+    <input id="ollamaUrl" type="text" value="http://localhost:11434">
+    <label>Model</label>
+    <select id="modelSelect">
+      <option value="llama3">llama3 (recommended)</option>
+      <option value="llama3.1">llama3.1</option>
+      <option value="mistral">mistral</option>
+      <option value="phi3">phi3 (lightweight)</option>
+      <option value="gemma2">gemma2</option>
+    </select>
+    <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+      <button class="test-btn" style="margin-top:0" onclick="testOllamaConn()">Test Connection</button>
+      <button class="test-btn" style="margin-top:0;background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveHiddenSettings()">Save & Close</button>
+    </div>
+    <div class="test-result hidden" id="testResult"></div>
+    <div class="card" style="margin-top:16px;padding:14px 16px">
+      <div class="card-title" style="font-size:11px;margin-bottom:8px">Restore Pro Access</div>
+      <div style="display:flex;gap:8px">
+        <input type="email" id="restoreEmail" placeholder="your@email.com" style="margin:0;flex:1;font-size:13px">
+        <button class="test-btn" style="margin-top:0;white-space:nowrap;font-size:12px" onclick="restoreAccess()">Check</button>
+      </div>
+      <div id="restoreMsg" style="font-size:12px;margin-top:8px;min-height:16px"></div>
     </div>
   </div>
 </div>
@@ -1467,10 +1465,38 @@ function showErr(msg){const b=document.getElementById('errBox');b.textContent=ms
 function clearErr(){document.getElementById('errBox').classList.add('hidden')}
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
+// ─── Hidden settings ─────────────────────────────────────────────────────────
+let _logoClicks=0,_logoTimer;
+document.querySelector('.logo').style.cursor='default';
+document.querySelector('.logo').addEventListener('click',()=>{
+  _logoClicks++;
+  clearTimeout(_logoTimer);
+  if(_logoClicks>=5){_logoClicks=0;openHiddenSettings();}
+  else{_logoTimer=setTimeout(()=>{_logoClicks=0},2000);}
+});
+function openHiddenSettings(){
+  const saved=localStorage.getItem('estimix_ollama_url');
+  const savedModel=localStorage.getItem('estimix_ollama_model');
+  if(saved)document.getElementById('ollamaUrl').value=saved;
+  if(savedModel)document.getElementById('modelSelect').value=savedModel;
+  document.getElementById('hsModal').classList.add('show');
+}
+function closeHiddenSettings(){document.getElementById('hsModal').classList.remove('show')}
+function saveHiddenSettings(){
+  localStorage.setItem('estimix_ollama_url',document.getElementById('ollamaUrl').value);
+  localStorage.setItem('estimix_ollama_model',document.getElementById('modelSelect').value);
+  closeHiddenSettings();
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   const saved=localStorage.getItem('theme');
   const dark=saved==='dark'||(saved===null&&window.matchMedia('(prefers-color-scheme: dark)').matches);
   if(dark){document.body.classList.add('dark');document.getElementById('themeIcon').textContent='☾';document.getElementById('themeLabel').textContent='Dark mode'}
+  // restore saved Ollama settings
+  const savedUrl=localStorage.getItem('estimix_ollama_url');
+  const savedMdl=localStorage.getItem('estimix_ollama_model');
+  if(savedUrl)document.getElementById('ollamaUrl').value=savedUrl;
+  if(savedMdl)document.getElementById('modelSelect').value=savedMdl;
   document.getElementById('aiMode').classList.remove('hidden');
   document.getElementById('manualMode').classList.add('hidden');
   loadClientsIntoSelector();
