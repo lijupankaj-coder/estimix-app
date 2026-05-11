@@ -797,15 +797,15 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     </div>
     <div class="pw-body">
       <div class="pw-plans">
-        <div class="pw-plan active" data-plan="pro" onclick="selectPlan(this)">
-          <div class="pw-plan-name">Pro</div>
-          <div class="pw-plan-price">AED 99</div>
-          <div class="pw-plan-desc">Single user · Unlimited estimates · 1 year</div>
+        <div class="pw-plan" data-plan="monthly" onclick="selectPlan(this)">
+          <div class="pw-plan-name">Monthly</div>
+          <div class="pw-plan-price">$9</div>
+          <div class="pw-plan-desc">Single user · Unlimited estimates · billed monthly</div>
         </div>
-        <div class="pw-plan" data-plan="team" onclick="selectPlan(this)">
-          <div class="pw-plan-name">Team</div>
-          <div class="pw-plan-price">AED 249</div>
-          <div class="pw-plan-desc">Up to 5 users · Unlimited estimates · 1 year</div>
+        <div class="pw-plan active" data-plan="yearly" onclick="selectPlan(this)">
+          <div class="pw-plan-name">Yearly</div>
+          <div class="pw-plan-price">$99</div>
+          <div class="pw-plan-desc">Single user · Unlimited estimates · billed yearly</div>
         </div>
       </div>
       <label>Your email</label>
@@ -1065,11 +1065,11 @@ function handlePaywall(){
   const email=document.getElementById('pwEmail').value.trim();
   const msg=document.getElementById('pwMsg');
   if(!email||!email.includes('@')){msg.style.color='var(--danger)';msg.textContent='Please enter a valid email.';return}
-  const plan=document.querySelector('.pw-plan.active')?.dataset.plan||'pro';
-  const planName=plan==='team'?'Team':'Pro';
-  const price=plan==='team'?'AED 249':'AED 99';
-  const sub=encodeURIComponent(`Estimix ${planName} — Purchase Request`);
-  const body=encodeURIComponent(`Hi,\n\nI'd like to purchase Estimix ${planName} (${price}/year).\n\nEmail: ${email}\n\nPlease send payment details.\n\nThank you.`);
+  const plan=document.querySelector('.pw-plan.active')?.dataset.plan||'yearly';
+  const planName=plan==='monthly'?'Monthly':'Yearly';
+  const price=plan==='monthly'?'$9/month':'$99/year';
+  const sub=encodeURIComponent(`Estimix Pro ${planName} — Purchase Request`);
+  const body=encodeURIComponent(`Hi,\n\nI'd like to purchase Estimix Pro ${planName} (${price}).\n\nEmail: ${email}\n\nPlease send payment details.\n\nThank you.`);
   window.location.href=`mailto:hello@nebulixcloud.com?subject=${sub}&body=${body}`;
   sbPost('nblx_users',{email,name:'',source:'estimix'});
   msg.style.color='var(--muted)';msg.textContent='Email app should open — send the message to complete your purchase.';
