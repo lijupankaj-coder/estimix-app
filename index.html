@@ -184,10 +184,10 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .test-result.ok{background:rgba(5,150,105,.07);border:1px solid rgba(5,150,105,.2);color:var(--success)}
 .test-result.fail{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--danger)}
 /* manual picker */
-.del-col-hdr{display:grid;grid-template-columns:200px 1fr 80px 28px;gap:8px;padding:0 12px;margin-bottom:6px}
+.del-col-hdr{display:grid;grid-template-columns:1fr 100px 28px;gap:8px;padding:0 12px;margin-bottom:6px}
 .del-col-hdr span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .del-list{display:flex;flex-direction:column;gap:7px}
-.del-row{display:grid;grid-template-columns:200px 1fr 80px 28px;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;animation:slideIn .18s ease}
+.del-row{display:grid;grid-template-columns:1fr 100px 28px;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px;animation:slideIn .18s ease}
 @keyframes slideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .del-row select{margin:0;padding:6px 26px 6px 8px;font-size:12px;border-radius:6px;background-color:var(--surface)}
 .del-row .del-desc{margin:0;background:transparent;border:none;padding:4px 2px;font-size:12px;color:var(--muted);font-family:var(--font)}
@@ -259,6 +259,18 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .pw-divider{display:flex;align-items:center;gap:10px;margin:18px 0 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .pw-divider::before,.pw-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 #keyMsg{font-size:12px;margin-top:8px;text-align:center;min-height:18px}
+/* workspace setup modal */
+.ws-modal{position:fixed;inset:0;background:var(--bg);z-index:9000;display:none;align-items:center;justify-content:center;padding:24px}
+.ws-modal.show{display:flex}
+.ws-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:420px;padding:36px 36px 28px;box-shadow:0 24px 60px rgba(0,0,0,.12);text-align:center}
+.ws-logo{font-size:26px;font-weight:900;color:var(--accent);letter-spacing:-0.5px;margin-bottom:6px}
+.ws-title{font-size:19px;font-weight:800;color:var(--black);margin-bottom:8px}
+.ws-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;text-align:left}
+.ws-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:var(--font);font-size:14px;font-weight:700;padding:13px;cursor:pointer;transition:background .15s;margin-top:2px}
+.ws-btn:hover{background:var(--accent-dk)}
+.ws-msg{font-size:12px;margin-top:10px;min-height:14px}
+.ws-restore-link{font-size:12px;color:var(--muted);margin-top:18px;cursor:pointer;text-decoration:underline;display:inline-block}
+.company-tag{font-size:10px;color:var(--muted);padding:3px 8px;background:var(--bg);border-radius:4px;display:inline-block;margin-top:6px;max-width:176px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top}
 /* hidden settings panel */
 .hs-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:3000;display:none;align-items:center;justify-content:center;padding:24px}
 .hs-modal.show{display:flex}
@@ -281,6 +293,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   <div class="logo">
     <span class="logo-name">Estimix<small>Estimate Builder</small></span>
     <a href="https://nebulixcloud.com" target="_blank" rel="noopener" class="logo-badge">by Nebulix</a>
+    <div id="wsCompanyTag" class="company-tag" style="display:none"></div>
   </div>
   <div class="nav-items">
     <button class="nav-btn active" data-page="new"><span class="nav-icon">✦</span> New Estimate</button>
@@ -464,7 +477,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
             <div class="card-title">Deliverables</div>
             <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Pick a deliverable type and enter the cost. Edit description as needed.</p>
             <div class="del-col-hdr">
-              <span>TYPE</span><span>CUSTOM DESCRIPTION (OPTIONAL)</span><span id="manualCostHdr" style="text-align:right">AED</span><span></span>
+              <span>DELIVERABLE / DESCRIPTION</span><span id="manualCostHdr" style="text-align:right">AED</span><span></span>
             </div>
             <div class="del-list" id="manualDelList"></div>
             <button class="add-del-btn" onclick="addManualRow()">+ Add deliverable</button>
@@ -642,14 +655,42 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   </div>
 </div>
 
+<!-- Workspace Setup Modal -->
+<div class="ws-modal" id="wsModal">
+  <div class="ws-box">
+    <div class="ws-logo">⚡ Estimix</div>
+    <div class="ws-title">Set Up Your Workspace</div>
+    <div class="ws-sub">Enter your company or agency name. Your estimates, clients, and history will be stored privately under this workspace — completely separate from other companies.</div>
+    <label style="text-align:left;display:block">Company / Agency Name</label>
+    <input id="wsNameInput" type="text" placeholder="e.g. Acme Creative Agency" autocomplete="organization" style="text-align:left" onkeydown="if(event.key==='Enter')setupWorkspace()">
+    <div id="wsMsg" class="ws-msg"></div>
+    <button class="ws-btn" onclick="setupWorkspace()">Get Started →</button>
+    <div style="margin-top:18px">
+      <span class="ws-restore-link" onclick="showWsRestore()">Already have a workspace code?</span>
+      <div id="wsRestoreArea" style="display:none;margin-top:10px">
+        <input id="wsCodeInput" type="text" placeholder="Paste workspace code" style="text-align:left;margin-bottom:8px">
+        <button class="ws-btn" style="background:var(--bg);color:var(--accent);border:1.5px solid var(--accent)" onclick="restoreWorkspace()">Restore Workspace</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Hidden AI Settings Modal (click logo 5×) -->
 <div class="hs-modal" id="hsModal">
   <div class="hs-box">
     <div class="hs-header">
-      <div class="hs-title">⚙ AI Configuration</div>
+      <div class="hs-title">⚙ Configuration</div>
       <button class="hs-close" onclick="closeHiddenSettings()">×</button>
     </div>
-    <div class="hs-sub">Internal settings — not visible to users.</div>
+    <div class="hs-sub" style="margin-bottom:12px">Internal settings — not visible to users.</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px">Workspace</div>
+        <div id="hsWsName" style="font-size:13px;font-weight:700;color:var(--black)">—</div>
+        <div id="hsWsCode" style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px"></div>
+      </div>
+      <button class="test-btn" style="margin:0;font-size:11px;padding:6px 12px;white-space:nowrap" onclick="switchWorkspace()">Switch →</button>
+    </div>
     <label>Ollama URL</label>
     <input id="ollamaUrl" type="text" value="http://localhost:11434">
     <label>Model</label>
@@ -677,6 +718,43 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 </div>
 
 <script>
+// ─── Workspace isolation ─────────────────────────────────────────────────────
+function getWsId(){return localStorage.getItem('estimix_workspace')||''}
+function getWsName(){return localStorage.getItem('estimix_workspace_name')||''}
+function wsk(k){const w=getWsId();return w?`est_${w}_${k}`:`estimix_${k}`}
+function setupWorkspace(){
+  const name=document.getElementById('wsNameInput').value.trim();
+  const msg=document.getElementById('wsMsg');
+  if(!name||name.length<2){msg.style.color='var(--danger)';msg.textContent='Please enter your company name.';return}
+  const id=name.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  localStorage.setItem('estimix_workspace',id);
+  localStorage.setItem('estimix_workspace_name',name);
+  document.getElementById('wsModal').classList.remove('show');
+  applyWorkspace();
+}
+function showWsRestore(){document.getElementById('wsRestoreArea').style.display='block'}
+function restoreWorkspace(){
+  const code=document.getElementById('wsCodeInput').value.trim().toLowerCase();
+  if(!code){return}
+  localStorage.setItem('estimix_workspace',code);
+  localStorage.setItem('estimix_workspace_name',code);
+  document.getElementById('wsModal').classList.remove('show');
+  applyWorkspace();
+}
+function switchWorkspace(){
+  closeHiddenSettings();
+  document.getElementById('wsNameInput').value='';
+  document.getElementById('wsMsg').textContent='';
+  document.getElementById('wsRestoreArea').style.display='none';
+  document.getElementById('wsModal').classList.add('show');
+}
+function applyWorkspace(){
+  const name=getWsName()||getWsId();
+  const tag=document.getElementById('wsCompanyTag');
+  if(tag&&name){tag.textContent=name;tag.style.display='inline-block'}
+  loadClientsIntoSelector();updateBanner();checkOllama();
+  setInterval(checkOllama,15000);
+}
 // ─── Currency & Tax ───────────────────────────────────────────────────────────
 const CURRENCIES={
   AED:{sym:'AED',fmt:v=>`AED ${v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`},
@@ -722,10 +800,10 @@ async function sbPost(t,d){try{const r=await fetch(`${SB_URL}/rest/v1/${t}`,{met
 async function sbGet(t,q){try{const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:sbH});return r.ok?r.json():null}catch{return null}}
 
 // ─── Freemium ─────────────────────────────────────────────────────────────────
-const FREE_LIMIT=3, PRO_KEY='estimix_pro_email', PLAN_KEY='estimix_pro_plan', USES_KEY='estimix_uses';
-function isPro(){return!!localStorage.getItem(PRO_KEY)}
-function getUses(){return parseInt(localStorage.getItem(USES_KEY)||'0')}
-function incrementUses(){localStorage.setItem(USES_KEY,(getUses()+1).toString())}
+const FREE_LIMIT=3;
+function isPro(){return!!localStorage.getItem(wsk('pro_email'))}
+function getUses(){return parseInt(localStorage.getItem(wsk('uses'))||'0')}
+function incrementUses(){localStorage.setItem(wsk('uses'),(getUses()+1).toString())}
 function usesLeft(){return Math.max(0,FREE_LIMIT-getUses())}
 function updateBanner(){
   const b=document.getElementById('usageBanner'),u=document.getElementById('bannerUses');
@@ -760,7 +838,7 @@ async function checkEmailAccess(){
   const a=rows[0];
   if(a.status!=='active'){msg.style.color='var(--danger)';msg.textContent='Access revoked. Contact hello@nebulixcloud.com';return}
   if(a.expires_at&&new Date(a.expires_at)<new Date()){msg.style.color='var(--danger)';msg.textContent='Access expired. Contact hello@nebulixcloud.com to renew.';return}
-  localStorage.setItem(PRO_KEY,email);localStorage.setItem(PLAN_KEY,a.plan||'pro');
+  localStorage.setItem(wsk('pro_email'),email);localStorage.setItem(wsk('pro_plan'),a.plan||'pro');
   msg.style.color='var(--success)';msg.textContent='✓ Access confirmed! Unlocking…';
   setTimeout(()=>{closePaywall();updateBanner()},1200);
 }
@@ -774,68 +852,11 @@ async function restoreAccess(){
   const a=rows[0];
   if(a.status!=='active'){msg.style.color='var(--danger)';msg.textContent='Access revoked.';return}
   if(a.expires_at&&new Date(a.expires_at)<new Date()){msg.style.color='var(--danger)';msg.textContent='Access expired.';return}
-  localStorage.setItem(PRO_KEY,email);localStorage.setItem(PLAN_KEY,a.plan||'pro');
+  localStorage.setItem(wsk('pro_email'),email);localStorage.setItem(wsk('pro_plan'),a.plan||'pro');
   msg.style.color='var(--success)';msg.textContent='✓ Access confirmed!';
   updateBanner();
 }
 
-// ─── Rate card ────────────────────────────────────────────────────────────────
-const RATES=[
-  ["eDM – Design & Layout (English)",0,"Design and layout of the eDM as per brand guidelines. Includes responsive email structure, hero image placement, offer section design, and CTA button design. English version.","edm_design_en"],
-  ["eDM – Design & Layout (Arabic)",0,"Design and layout of the eDM as per brand guidelines. Includes right-to-left layout structure, Arabic typography treatment, imagery placement, and CTA button design. Arabic version.","edm_design_ar"],
-  ["eDM – Copywriting (English)",0,"English copywriting for all sections of the eDM including headline, subheadline, body copy, offer details, and CTA text.","edm_copy_en"],
-  ["eDM – Copywriting (Arabic)",0,"Arabic copywriting for all sections of the eDM including headline, subheadline, body copy, offer details, and CTA text. Native Arabic language copy.","edm_copy_ar"],
-  ["eDM – Design Adaptation (English)",0,"Adaptation of existing eDM design for a different audience segment or product variant. Base layout retained; hero image, offer section, and segment-specific elements updated. English version.","edm_adapt_design_en"],
-  ["eDM – Design Adaptation (Arabic)",0,"Adaptation of existing eDM design for a different audience segment or product variant. Base layout retained; hero image, offer section, and segment-specific elements updated. Arabic version.","edm_adapt_design_ar"],
-  ["eDM – Copy Adaptation (English)",0,"Minor English copy updates to existing eDM template. Updating offer details, dates, or segment-specific messaging while retaining the overall structure.","edm_adapt_copy_en"],
-  ["eDM – Copy Adaptation (Arabic)",0,"Minor Arabic copy updates to existing eDM template. Updating offer details, dates, or segment-specific messaging while retaining the overall structure.","edm_adapt_copy_ar"],
-  ["eDM – Arabic Proofing",0,"Professional Arabic language proofing and quality check of all Arabic copy elements within the eDM. Includes grammar, spelling, tone, and brand terminology review.","edm_proofing_ar"],
-  ["Key Visual – Campaign Concept Development",0,"Development of the overarching campaign concept and messaging strategy. Multiple creative directions presented for review and selection prior to final key visual development.","kv_concept"],
-  ["Key Visual – Master Artwork (English)",0,"Creation of the master campaign key visual artwork. Includes AI-assisted image generation, Photoshop compositing, brand element integration, and stock image application. English version.","kv_artwork_en"],
-  ["Key Visual – Master Artwork (Arabic Adaptation)",0,"Arabic language adaptation of the master key visual. Includes right-to-left text placement, Arabic typography treatment, and layout recomposition for Arabic reading direction.","kv_artwork_ar"],
-  ["Key Visual – Secondary Variant Artwork",0,"Development of a secondary key visual for an additional target segment, product variant, or campaign phase. Adapted from the master concept with relevant visual and messaging adjustments.","kv_secondary"],
-  ["Key Visual – Teaser Artwork",0,"Development of a teaser key visual for the pre-campaign awareness phase. Adapted from the master campaign concept with teaser messaging treatment.","kv_teaser"],
-  ["Key Visual – English Copywriting",0,"Development of all English copy for the key visual including main headline, subheadline, offer details, disclaimer line, and CTA text.","kv_copy_en"],
-  ["Key Visual – Arabic Copywriting",0,"Development of all Arabic copy for the key visual including main headline, subheadline, offer details, disclaimer line, and CTA text. Native Arabic language copy.","kv_copy_ar"],
-  ["Video – Motion Design (English)",0,"Development of the campaign video/motion graphic. Includes animation of key visual elements, text animation, brand element integration, and stock footage sourcing. English version.","video_design_en"],
-  ["Video – Motion Design (Arabic)",0,"Arabic version of the campaign video/motion graphic. Includes Arabic text animation, right-to-left text treatment, and all motion elements adapted for Arabic.","video_design_ar"],
-  ["Video – Script / Copywriting (English)",0,"English script and on-screen copy development for the video. Includes voiceover script, on-screen headline, offer text, animated copy lines, and CTA text.","video_copy_en"],
-  ["Video – Size Adaptation (per size per language)",0,"Adaptation of the master video to an alternate size format. Layout and composition reframed for the new dimensions.","video_resize"],
-  ["Social Post – Design (Vertical Master)",0,"Full design of vertical social media post with custom visuals, brand elements, and campaign imagery.","social_design_vertical"],
-  ["Social Post – Design (Square Adaptation)",0,"Resizing and layout adaptation of the vertical master social post to square format.","social_design_square"],
-  ["Social Post – Copywriting (English)",0,"English copywriting for the social post including headline, body copy, hashtags, and CTA.","social_copy_en"],
-  ["IG Story – Teaser Design (single frame)",0,"Single-frame teaser Instagram Story. Introduces the campaign theme and creates awareness ahead of the full announcement.","ig_story_teaser"],
-  ["IG Story – Announcement Design (5 frames, English)",0,"Full 5-frame Instagram Story announcement as per brand guidelines. English version. Includes intro frame, offer detail frames, and CTA frame.","ig_story_announce_en"],
-  ["IG Story – Announcement Design (5 frames, Arabic)",0,"Full 5-frame Instagram Story announcement as per brand guidelines. Arabic version with right-to-left layout and Arabic typography treatment.","ig_story_announce_ar"],
-  ["IG Story – Copywriting (English)",0,"English copywriting for all Instagram Story frames including teaser intro, offer headline, offer details, and CTA copy for each frame.","ig_story_copy_en"],
-  ["IG Story – Copywriting (Arabic)",0,"Arabic copywriting for all Instagram Story frames. Native Arabic copy for teaser intro, offer headline, offer details, and CTA for each frame.","ig_story_copy_ar"],
-  ["IG Story – Design Adaptation (English)",0,"Design adaptation of the master Instagram Story for an alternate segment or locale. Layout and visuals updated accordingly. English version.","ig_story_adapt_en"],
-  ["IG Story – Design Adaptation (Arabic)",0,"Design adaptation of the master Instagram Story for an alternate segment or locale. Arabic version.","ig_story_adapt_ar"],
-  ["Flyer – Design Layout (English)",0,"Design and layout of the flyer as per brand guidelines. Includes all page layouts, imagery placement, custom icons, and product section design. English version.","flyer_design_en"],
-  ["Flyer – Design Layout (Arabic)",0,"Design and layout of the flyer as per brand guidelines. Full Arabic right-to-left layout with Arabic typography treatment.","flyer_design_ar"],
-  ["Flyer – Copywriting (English)",0,"English copywriting for the full flyer including all section headings, body copy, product descriptions, and CTA.","flyer_copy_en"],
-  ["Flyer – Copywriting (Arabic)",0,"Arabic copywriting for the full flyer. Native Arabic language copy for all sections.","flyer_copy_ar"],
-  ["Flyer – Design Adaptation",0,"Adaptation of existing flyer design for updated content. Base structure and brand elements retained; product section and relevant elements updated.","flyer_adapt"],
-  ["Push Notification – Copywriting",0,"English and Arabic copy for push notification. Concise messaging communicating the key campaign offer and CTA.","push_copy"],
-  ["SMS – Copywriting",0,"SMS copy in English and Arabic. Short-form campaign messaging within character limits including offer headline and CTA.","sms_copy"],
-  ["WhatsApp Banner – Design",0,"Adaptation of campaign key visual to WhatsApp banner dimensions. Layout recomposed for WhatsApp format.","whatsapp_design"],
-  ["WhatsApp Banner – Copywriting (English + Arabic)",0,"Short-form copy for WhatsApp banner in English and Arabic. Includes offer headline and CTA text.","whatsapp_copy"],
-  ["Digital Banner – Design (English)",0,"Design of digital banner as per brand guidelines. English version. Optimised for digital display.","banner_design_en"],
-  ["Digital Banner – Design (Arabic, adapted)",0,"Arabic adaptation of English digital banner. Right-to-left layout adjustment and Arabic text placement.","banner_design_ar"],
-  ["Carousel – Design + Custom Icons",0,"Design of carousel social post including custom-designed icons or illustrations for each frame.","carousel_design"],
-  ["Carousel – Copywriting (English)",0,"English copywriting for all carousel frames including individual frame headlines and body copy.","carousel_copy_en"],
-  ["Landing Page – Content Development (English)",0,"Full landing page content development in English. Covers all product sections, key benefits, application steps, and CTA.","landing_page_en"],
-  ["Landing Page – Content Development (Arabic)",0,"Full Arabic landing page content development. All sections localised into native Arabic.","landing_page_ar"],
-  ["Brochure – Design Update",0,"Updates to existing brochure design including new imagery, layout adjustments, and file preparation for output.","brochure_design"],
-  ["Brochure – Copy Update",0,"Minor copy updates to existing brochure including updated figures, product descriptions, and proofing of updated sections.","brochure_copy"],
-  ["PDF Document – Redesign / Retyping",0,"Complex update or redesign of existing PDF document. Sections redesigned and rebuilt as required.","pdf_update"],
-  ["Card Design – Multiple options + mockups",0,"Development of multiple card design options with distinct visual treatments. Front and back mockups produced for each option.","card_design"],
-  ["Stock Image – Sourcing + Licensing",0,"Sourcing of suitable stock images. Includes review, selection, and licensing for all required usage rights.","stock_image"],
-  ["Custom line item",0,"Enter your own description and cost","custom"],
-];
-
-const DEFAULT_RATES={};
-RATES.forEach(r=>{ if(r[3]!=='custom') DEFAULT_RATES[r[3]]=r[1]; });
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let histProjects=[], currentEstimate=null, recInterval=null, recSeconds=0;
@@ -1070,8 +1091,8 @@ function getActiveBrief(){
 }
 
 // ─── Client helpers ───────────────────────────────────────────────────────────
-function loadClientsFromStorage(){return JSON.parse(localStorage.getItem('estimix_clients')||'[]')}
-function saveClientsToStorage(c){localStorage.setItem('estimix_clients',JSON.stringify(c))}
+function loadClientsFromStorage(){return JSON.parse(localStorage.getItem(wsk('clients'))||'[]')}
+function saveClientsToStorage(c){localStorage.setItem(wsk('clients'),JSON.stringify(c))}
 function getSelectedClientName(){
   const sel=document.getElementById('clientName');
   const id=sel?sel.value:'';
@@ -1108,9 +1129,6 @@ function loadClientsIntoSelector(){
 }
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
-function buildDeliverableList(){
-  return RATES.filter(r=>r[3]!=='custom').map(r=>`  KEY=${r[3]} | ${r[0]}`).join('\n');
-}
 function buildPrompt(payload){
   const{projectName,clientName,brief,historicalProjects,referenceProject}=payload;
   const curr=getCurrSym();
@@ -1128,31 +1146,26 @@ function buildPrompt(payload){
       refSection+='\nAdapt descriptions and costs to the new brief. New deliverables take priority.';
     }
   }
-  return`You are a senior creative agency estimator for ${clientName}.
-You produce detailed estimates where every deliverable is broken into individual sub-items.
-Currency: ${curr}
+  return`You are a senior creative agency estimator working on a project for ${clientName}.
+Produce a detailed itemised estimate. Currency: ${curr}
 
-AVAILABLE DELIVERABLE TYPES (use these exact keys, estimate realistic cost in ${curr} based on scope):
-${buildDeliverableList()}
-
-HISTORICAL CONTEXT:
+HISTORICAL CONTEXT (use as pricing reference):
 ${history||'(none provided)'}
 ${refSection}
 
 RULES — CRITICAL:
-1. Use ONLY items from the deliverable types above. Do not invent new keys.
-2. Output one line per sub-item using this exact pipe format:
-   ITEM | KEY | custom description | cost
-3. KEY must exactly match a KEY from the list above
-4. The custom description should be specific to this project
-5. Cost is your estimate in ${curr} — be realistic based on complexity and scope
-6. English and Arabic are always separate line items
-7. Design and copywriting are always separate line items — never combine them
-8. Do NOT output totals, headers, or any text other than ITEM lines
+1. Output one line per deliverable sub-item using this exact pipe format:
+   ITEM | deliverable name | specific description | cost
+2. Be specific — name each deliverable clearly (e.g. "eDM Design – English", "Landing Page Copywriting")
+3. English and Arabic versions are always separate line items
+4. Design and copywriting are always separate line items — never combine them
+5. Cost must be a realistic number in ${curr} — no zeros, no placeholders
+6. Do NOT output totals, section headers, or any text other than ITEM lines
 
 EXAMPLE FORMAT:
-ITEM | edm_design_en | Design and layout of the eDM for the ${clientName} campaign. English version. | 1500
-ITEM | edm_copy_en | English copywriting for the eDM including headline and CTA. | 800
+ITEM | eDM Design (English) | Full design and layout of the eDM including hero, offer section, and CTA. English version. | 1500
+ITEM | eDM Copywriting (English) | English headline, body copy, offer details, and CTA for the eDM. | 800
+ITEM | Social Post Design (Vertical) | Vertical social post design with campaign visuals and brand elements. | 600
 
 PROJECT BRIEF:
 ${brief}
@@ -1160,24 +1173,18 @@ ${brief}
 List all deliverables now:`;
 }
 function parsePipeResponse(text){
-  const keyMap={};
-  RATES.forEach(r=>{if(r[3]!=='custom')keyMap[r[3]]=r});
   const items=[];
   text.split('\n').forEach(line=>{
     line=line.trim();
     if(!line.toUpperCase().startsWith('ITEM'))return;
     const parts=line.split('|').map(p=>p.trim());
-    if(parts.length<4)return;
-    const key=parts[1];
-    const desc=parts[2]||'';
-    const cost=parseFloat(String(parts[3]).replace(/[^\d.]/g,''))||0;
-    if(cost<=0)return;
-    const rateEntry=keyMap[key];
-    if(rateEntry){
-      items.push({description:desc&&desc.length>8?desc:rateEntry[0],detail:rateEntry[2],cost});
-    }else{
-      items.push({description:desc,detail:'Custom deliverable',cost});
-    }
+    if(parts.length<3)return;
+    const name=parts[1]||'';
+    const detail=parts.length>=4?parts[2]:'';
+    const costStr=parts.length>=4?parts[3]:parts[2];
+    const cost=parseFloat(String(costStr).replace(/[^\d.]/g,''))||0;
+    if(!name||cost<=0)return;
+    items.push({description:name,detail,cost});
   });
   return items;
 }
@@ -1338,13 +1345,13 @@ function resetForm(){
 
 // ─── History ──────────────────────────────────────────────────────────────────
 function saveHistoryItem(item){
-  const h=JSON.parse(localStorage.getItem('estimix_history')||'[]');
+  const h=JSON.parse(localStorage.getItem(wsk('history'))||'[]');
   h.unshift({...item,savedAt:new Date().toISOString()});
-  localStorage.setItem('estimix_history',JSON.stringify(h.slice(0,200)));
+  localStorage.setItem(wsk('history'),JSON.stringify(h.slice(0,200)));
 }
 function loadHistory(){
   const list=document.getElementById('historyList'),empty=document.getElementById('historyEmpty');
-  const items=JSON.parse(localStorage.getItem('estimix_history')||'[]');
+  const items=JSON.parse(localStorage.getItem(wsk('history'))||'[]');
   list.innerHTML='';
   if(!items.length){empty.classList.remove('hidden');return}
   empty.classList.add('hidden');
@@ -1356,35 +1363,29 @@ function loadHistory(){
   });
 }
 function deleteHistItem(id){
-  const h=JSON.parse(localStorage.getItem('estimix_history')||'[]');
-  localStorage.setItem('estimix_history',JSON.stringify(h.filter(i=>i.id!==id)));
+  const h=JSON.parse(localStorage.getItem(wsk('history'))||'[]');
+  localStorage.setItem(wsk('history'),JSON.stringify(h.filter(i=>i.id!==id)));
   loadHistory();
 }
 
 // ─── Manual picker ────────────────────────────────────────────────────────────
-function addManualRow(selIdx,descVal,costVal){
-  selIdx=selIdx!==undefined?selIdx:0;
-  descVal=descVal!==undefined?descVal:'';
-  costVal=costVal!==undefined?costVal:'';
+function addManualRow(nameVal,costVal){
+  nameVal=nameVal||'';costVal=costVal||'';
   const list=document.getElementById('manualDelList');if(!list)return;
   const row=document.createElement('div');row.className='del-row';
-  const sel=document.createElement('select');
-  RATES.forEach((r,i)=>{const o=document.createElement('option');o.value=i;o.textContent=r[0];if(i===selIdx)o.selected=true;sel.appendChild(o)});
-  const desc=document.createElement('input');desc.type='text';desc.className='del-desc';desc.placeholder='Optional custom description';desc.value=descVal;
+  const name=document.createElement('input');name.type='text';name.className='del-name';name.placeholder='e.g. Social media campaign design';name.value=nameVal;
   const cost=document.createElement('input');cost.type='number';cost.className='del-cost';cost.min='0';cost.placeholder='0';cost.value=costVal;
   const xBtn=document.createElement('button');xBtn.className='del-x';xBtn.innerHTML='&times;';
   xBtn.onclick=()=>{if(list.children.length>1)row.remove();updateManualPreview()};
-  sel.onchange=()=>{updateManualPreview()};
-  cost.oninput=updateManualPreview;desc.oninput=updateManualPreview;
-  row.appendChild(sel);row.appendChild(desc);row.appendChild(cost);row.appendChild(xBtn);
+  name.oninput=updateManualPreview;cost.oninput=updateManualPreview;
+  row.appendChild(name);row.appendChild(cost);row.appendChild(xBtn);
   list.appendChild(row);updateManualPreview();
 }
 function getManualItems(){
   return[...document.querySelectorAll('#manualDelList .del-row')].map(row=>{
-    const selIdx=+row.querySelector('select').value;
-    const desc=row.querySelector('.del-desc').value.trim();
+    const name=row.querySelector('.del-name').value.trim();
     const cost=parseFloat(row.querySelector('.del-cost').value)||0;
-    return{description:desc||RATES[selIdx][0],detail:RATES[selIdx][2],cost};
+    return{description:name||'Deliverable',detail:'',cost};
   }).filter(i=>i.cost>0);
 }
 function updateManualPreview(){
@@ -1513,6 +1514,9 @@ function openHiddenSettings(){
   const savedModel=localStorage.getItem('estimix_ollama_model');
   if(saved)document.getElementById('ollamaUrl').value=saved;
   if(savedModel)document.getElementById('modelSelect').value=savedModel;
+  const hn=document.getElementById('hsWsName');const hc=document.getElementById('hsWsCode');
+  if(hn)hn.textContent=getWsName()||'—';
+  if(hc)hc.textContent=getWsId()?`code: ${getWsId()}`:'';
   document.getElementById('hsModal').classList.add('show');
 }
 function closeHiddenSettings(){document.getElementById('hsModal').classList.remove('show')}
@@ -1533,10 +1537,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(savedMdl)document.getElementById('modelSelect').value=savedMdl;
   document.getElementById('aiMode').classList.remove('hidden');
   document.getElementById('manualMode').classList.add('hidden');
-  loadClientsIntoSelector();
-  updateBanner();
-  checkOllama();
-  setInterval(checkOllama,15000);
+  // workspace check
+  if(!getWsId()){
+    document.getElementById('wsModal').classList.add('show');
+  }else{
+    const tag=document.getElementById('wsCompanyTag');
+    if(tag){tag.textContent=getWsName()||getWsId();tag.style.display='inline-block'}
+    loadClientsIntoSelector();updateBanner();checkOllama();
+    setInterval(checkOllama,15000);
+  }
 });
 </script>
 </body>
