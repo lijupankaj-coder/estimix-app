@@ -1316,7 +1316,7 @@ function loadHistory(){
   items.forEach(item=>{
     const date=new Date(item.savedAt||item.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
     const card=document.createElement('div');card.className='history-card';
-    card.innerHTML=`<div class="history-icon">📊</div><div class="history-info"><div class="history-name">${item.projectName}</div><div class="history-meta">${item.clientSegment||''} · ${item.itemCount} items · ${date}</div></div><div class="history-amount">AED ${(item.grand||0).toLocaleString()}</div><button class="history-del" onclick="deleteHistItem('${item.id}')">🗑</button>`;
+    card.innerHTML=`<div class="history-icon">📊</div><div class="history-info"><div class="history-name">${escHtml(item.projectName)}</div><div class="history-meta">${escHtml(item.clientSegment||'')} · ${item.itemCount} items · ${date}</div></div><div class="history-amount">${escHtml((item.grand||0).toLocaleString())}</div><button class="history-del" onclick="deleteHistItem('${escHtml(item.id)}')">🗑</button>`;
     list.appendChild(card);
   });
 }
@@ -1379,7 +1379,7 @@ function loadClientsPage(){
     const card=document.createElement('div');card.className='client-card';
     const projCount=(client.historyProjects||[]).length;
     const histStatus=projCount>0?`<span style="color:var(--success)">✓ ${projCount} historical projects</span>`:`<span style="color:var(--muted)">No historical data</span>`;
-    card.innerHTML=`<div class="client-icon">🏢</div><div class="client-info"><div class="client-name">${client.name}</div><div class="client-meta">${histStatus}</div></div><div class="client-actions"><button class="client-edit-btn" onclick="openEditClient('${client.id}')">✏ Edit</button><button class="client-del-btn" onclick="deleteClient('${client.id}','${client.name.replace(/'/g,"\\'")}')">🗑</button></div>`;
+    card.innerHTML=`<div class="client-icon">🏢</div><div class="client-info"><div class="client-name">${escHtml(client.name)}</div><div class="client-meta">${histStatus}</div></div><div class="client-actions"><button class="client-edit-btn" onclick="openEditClient('${escHtml(client.id)}')">✏ Edit</button><button class="client-del-btn" onclick="deleteClient('${escHtml(client.id)}','${escHtml(client.name).replace(/'/g,"\\'")}')">🗑</button></div>`;
     list.appendChild(card);
   });
 }
