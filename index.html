@@ -15,6 +15,7 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7384833188153383" crossorigin="anonymous"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg:#f4f3f0; --surface:#fff; --card:#fff; --border:#e4e2dc; --border2:#ccc9c0;
@@ -49,10 +50,6 @@ body.dark .logo-badge{background:rgba(124,58,237,.12)}
 .theme-toggle{display:flex;align-items:center;gap:8px;padding:11px 20px;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted);transition:color .2s;user-select:none;border-top:1px solid var(--border)}
 .theme-toggle:hover{color:var(--accent)}
 .theme-icon{font-size:14px;line-height:1}
-.ollama-status{display:flex;align-items:center;gap:8px;padding:11px 20px 16px;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.2px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);flex-shrink:0;transition:background .3s}
-.status-dot.online{background:var(--accent)!important;box-shadow:0 0 0 3px rgba(124,58,237,.2)}
-.status-dot.offline{background:var(--danger)}
 /* usage banner */
 .usage-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--accent-lt);border:1px solid #c4b5fd;border-radius:8px;margin-bottom:20px;font-size:13px}
 body.dark .usage-banner{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.3)}
@@ -259,6 +256,20 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .pw-divider{display:flex;align-items:center;gap:10px;margin:18px 0 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
 .pw-divider::before,.pw-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 #keyMsg{font-size:12px;margin-top:8px;text-align:center;min-height:18px}
+/* help page */
+.help-section{margin-bottom:28px}
+.help-section h2{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.help-section h2::before{content:'';width:14px;height:2px;background:var(--accent);flex-shrink:0}
+.help-steps{display:flex;flex-direction:column;gap:8px}
+.help-step{display:flex;gap:12px;align-items:flex-start}
+.help-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.help-text{font-size:13px;color:var(--dark);line-height:1.6}
+.help-text strong{color:var(--black)}
+.help-tip{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}
+/* letterhead upload */
+.lh-zone{border:1.5px dashed var(--border2);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:border-color .2s;margin-top:8px}
+.lh-zone:hover{border-color:var(--accent)}
+.lh-preview{width:100%;max-height:60px;object-fit:contain;border-radius:6px;margin-top:8px;display:none}
 /* workspace setup modal */
 .ws-modal{position:fixed;inset:0;background:var(--bg);z-index:9000;display:none;align-items:center;justify-content:center;padding:24px}
 .ws-modal.show{display:flex}
@@ -299,14 +310,11 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     <button class="nav-btn active" data-page="new"><span class="nav-icon">✦</span> New Estimate</button>
     <button class="nav-btn" data-page="history"><span class="nav-icon">◎</span> History</button>
     <button class="nav-btn" data-page="clients"><span class="nav-icon">👥</span> Clients</button>
+    <button class="nav-btn" data-page="help"><span class="nav-icon">?</span> Help</button>
   </div>
   <div class="theme-toggle" onclick="toggleTheme()">
     <span class="theme-icon" id="themeIcon">☀︎</span>
     <span id="themeLabel">Light mode</span>
-  </div>
-  <div class="ollama-status">
-    <span class="status-dot" id="statusDot"></span>
-    <span id="statusText">Checking…</span>
   </div>
 </nav>
 
@@ -528,8 +536,9 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
             <div id="sanityIssuesList"></div>
           </div>
           <div class="preview-actions">
-            <button class="dl-btn" onclick="downloadExcel()">⬇ Download Excel</button>
-            <button class="secondary-btn" onclick="resetForm()">New Estimate</button>
+            <button class="dl-btn" onclick="downloadPDF()" style="background:var(--success)!important">⬇ PDF</button>
+            <button class="dl-btn" onclick="downloadExcel()">⬇ Excel</button>
+            <button class="secondary-btn" onclick="resetForm()">New</button>
           </div>
         </div>
       </div>
@@ -593,7 +602,52 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     </div>
   </div>
 
-  <!-- SETTINGS PAGE -->
+  <!-- HELP PAGE -->
+  <div class="page" id="page-help">
+    <div class="page-header">
+      <h1>How to Use Estimix</h1>
+      <p>Quick guide to get the most out of your estimate builder.</p>
+    </div>
+    <div style="max-width:680px;display:flex;flex-direction:column;gap:0">
+      <div class="help-section">
+        <h2>Getting Started</h2>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Set your workspace</strong> — on first visit, enter your company name. This keeps all your data (clients, history, estimates) private to your workspace.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Add a client</strong> — go to the Clients tab and click "Add New Client". Optionally upload historical estimate Excel files to improve AI accuracy.</div></div>
+          <div class="help-step"><div class="help-num">3</div><div class="help-text"><strong>Upload your letterhead</strong> — click the Estimix logo 5 times to open Settings, then upload your company letterhead image.</div></div>
+        </div>
+      </div>
+      <div class="help-section">
+        <h2>Creating an Estimate</h2>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Fill in Project Details</strong> — choose a client, add a project name, set the currency and tax rate that apply.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Choose your mode:</strong><br>
+            • <strong>AI Generate</strong> — describe the project in the brief box (or upload a brief document / record your voice). Click "Generate with AI" and the AI writes the deliverable list and estimates costs.<br>
+            • <strong>Manual Picker</strong> — add deliverables one by one. Type the deliverable name and enter the cost yourself.
+          </div></div>
+          <div class="help-step"><div class="help-num">3</div><div class="help-text"><strong>Review the preview</strong> — the right panel shows a live estimate with subtotal, tax, and grand total.</div></div>
+          <div class="help-step"><div class="help-num">4</div><div class="help-text"><strong>Download</strong> — click <strong>Download Excel</strong> for a spreadsheet, or <strong>Download PDF</strong> for a branded PDF with your letterhead.</div></div>
+        </div>
+        <div class="help-tip">💡 <strong>AI tip:</strong> The more detail you include in the brief — deliverable types, languages, formats, target audience — the more accurate the AI estimate. Upload historical Excel files under each client to give the AI real pricing context.</div>
+      </div>
+      <div class="help-section">
+        <h2>Clients Tab</h2>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-num">1</div><div class="help-text"><strong>Add clients</strong> with their name. Each client has their own historical estimate data.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text"><strong>Upload historical estimates</strong> — an Excel file where each sheet is one past project. The AI uses this to match your real pricing patterns.</div></div>
+        </div>
+      </div>
+      <div class="help-section">
+        <h2>Workspace &amp; Sharing</h2>
+        <div class="help-steps">
+          <div class="help-step"><div class="help-num">1</div><div class="help-text">All data is stored in your browser under your workspace. Open Settings (5× logo click) to see your <strong>workspace code</strong>.</div></div>
+          <div class="help-step"><div class="help-num">2</div><div class="help-text">To use the same workspace on another device or browser — open Settings and enter the workspace code using <em>"Already have a workspace code?"</em> on the setup screen.</div></div>
+        </div>
+        <div class="help-tip">💡 <strong>AI Settings:</strong> The AI requires Ollama running locally. Install from <a href="https://ollama.com" target="_blank" style="color:var(--accent)">ollama.com</a>, run <code style="background:var(--bg);padding:1px 5px;border-radius:4px">ollama pull llama3</code> then <code style="background:var(--bg);padding:1px 5px;border-radius:4px">ollama serve</code>. Configure the URL and model in Settings.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="app-footer">
     <span>© 2026 Nebulix | All rights reserved.</span>
@@ -660,7 +714,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   <div class="ws-box">
     <div class="ws-logo">⚡ Estimix</div>
     <div class="ws-title">Set Up Your Workspace</div>
-    <div class="ws-sub">Enter your company or agency name. Your estimates, clients, and history will be stored privately under this workspace — completely separate from other companies.</div>
+    <div class="ws-sub">Enter your company or agency name. Your estimates, clients, and history will be stored privately under this workspace.</div>
     <label style="text-align:left;display:block">Company / Agency Name</label>
     <input id="wsNameInput" type="text" placeholder="e.g. Acme Creative Agency" autocomplete="organization" style="text-align:left" onkeydown="if(event.key==='Enter')setupWorkspace()">
     <div id="wsMsg" class="ws-msg"></div>
@@ -706,7 +760,16 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       <button class="test-btn" style="margin-top:0;background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveHiddenSettings()">Save & Close</button>
     </div>
     <div class="test-result hidden" id="testResult"></div>
-    <div class="card" style="margin-top:16px;padding:14px 16px">
+    <div style="margin-top:14px">
+      <label style="text-transform:uppercase;font-size:10px;letter-spacing:1px;font-weight:700;color:var(--muted)">Company Letterhead</label>
+      <div class="lh-zone" id="lhZone" onclick="pickLetterhead()">
+        <div style="font-size:11px;color:var(--muted)">Click to upload letterhead image (PNG, JPG)</div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:3px">Used in PDF downloads — full width at top of document</div>
+      </div>
+      <img id="lhPreview" class="lh-preview" alt="Letterhead preview">
+      <button id="lhClearBtn" class="test-btn" style="margin-top:6px;font-size:11px;display:none;color:var(--danger);border-color:var(--danger)" onclick="clearLetterhead()">Remove letterhead</button>
+    </div>
+    <div class="card" style="margin-top:14px;padding:14px 16px">
       <div class="card-title" style="font-size:11px;margin-bottom:8px">Restore Pro Access</div>
       <div style="display:flex;gap:8px">
         <input type="email" id="restoreEmail" placeholder="your@email.com" style="margin:0;flex:1;font-size:13px">
@@ -752,8 +815,7 @@ function applyWorkspace(){
   const name=getWsName()||getWsId();
   const tag=document.getElementById('wsCompanyTag');
   if(tag&&name){tag.textContent=name;tag.style.display='inline-block'}
-  loadClientsIntoSelector();updateBanner();checkOllama();
-  setInterval(checkOllama,15000);
+  loadClientsIntoSelector();updateBanner();
 }
 // ─── Currency & Tax ───────────────────────────────────────────────────────────
 const CURRENCIES={
@@ -892,13 +954,6 @@ async function ollamaStatus(){
     const d=await r.json();
     return{running:true,models:(d.models||[]).map(m=>m.name)};
   }catch{return{running:false,models:[]}}
-}
-async function checkOllama(){
-  const dot=document.getElementById('statusDot'),text=document.getElementById('statusText');
-  if(!dot||!text)return;
-  const res=await ollamaStatus();
-  if(res.running){dot.className='status-dot online';text.textContent=res.models.length?res.models[0].split(':')[0]:'Ollama online'}
-  else{dot.className='status-dot offline';text.textContent='Ollama offline'}
 }
 async function testOllamaConn(){
   const box=document.getElementById('testResult');
@@ -1487,6 +1542,118 @@ function deleteClient(id,name){
   loadClientsPage();loadClientsIntoSelector();
 }
 
+// ─── Letterhead ───────────────────────────────────────────────────────────────
+function pickLetterhead(){
+  triggerFileInput('image/png,image/jpeg,image/jpg',file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const data=e.target.result;
+      localStorage.setItem(wsk('letterhead'),data);
+      showLetterheadPreview(data);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function clearLetterhead(){
+  localStorage.removeItem(wsk('letterhead'));
+  const prev=document.getElementById('lhPreview');const btn=document.getElementById('lhClearBtn');
+  if(prev){prev.style.display='none';prev.src=''}
+  if(btn)btn.style.display='none';
+  document.getElementById('lhZone').style.display='';
+}
+function showLetterheadPreview(data){
+  const prev=document.getElementById('lhPreview');const btn=document.getElementById('lhClearBtn');
+  if(prev){prev.src=data;prev.style.display='block'}
+  if(btn)btn.style.display='block';
+  document.getElementById('lhZone').style.display='none';
+}
+
+// ─── Download PDF ─────────────────────────────────────────────────────────────
+function downloadPDF(){
+  if(!currentEstimate){alert('Generate an estimate first.');return}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const pw=210,margin=18,cw=pw-2*margin;
+  let y=margin;
+  const {projName,clientName,clientSeg,estRef,status,items,subtotal,vat,grand,notes}=currentEstimate;
+
+  // Letterhead
+  const lhData=localStorage.getItem(wsk('letterhead'));
+  if(lhData){
+    const img=new Image();
+    img.src=lhData;
+    const lhH=Math.round((img.naturalHeight||200)/(img.naturalWidth||800)*pw);
+    const clampedH=Math.min(Math.max(lhH,20),55);
+    const fmt=lhData.startsWith('data:image/png')?'PNG':'JPEG';
+    doc.addImage(lhData,fmt,0,0,pw,clampedH);
+    y=clampedH+8;
+  }
+
+  // Title bar
+  doc.setFillColor(124,58,237);doc.rect(margin,y,cw,10,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(255,255,255);
+  doc.text('ESTIMATE',margin+4,y+6.8);
+  const dateStr=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  doc.setFontSize(8);doc.text(dateStr,margin+cw-2,y+6.8,{align:'right'});
+  y+=14;
+
+  // Meta block
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,30,30);
+  const meta=[[projName,'Project'],[clientName||'','Client'],[clientSeg||'','Division'],[estRef||'','Ref #'],[status||'DRAFT','Status']].filter(r=>r[0]);
+  meta.forEach(([val,lbl])=>{
+    doc.setFont('helvetica','bold');doc.text(lbl+':',margin,y);
+    doc.setFont('helvetica','normal');doc.text(val,margin+22,y);
+    y+=5.5;
+  });
+  y+=4;
+
+  // Table header
+  doc.setFillColor(240,237,255);doc.rect(margin,y,cw,7,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(80,40,160);
+  doc.text('DELIVERABLE',margin+3,y+4.8);
+  doc.text(getCurrSym(),margin+cw-2,y+4.8,{align:'right'});
+  y+=7;
+
+  // Rows
+  doc.setTextColor(30,30,30);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  items.forEach((item,i)=>{
+    if(y>272){doc.addPage();y=margin}
+    if(i%2===0){doc.setFillColor(250,249,255);doc.rect(margin,y,cw,7,'F')}
+    const nameLines=doc.splitTextToSize(item.description,cw-28);
+    const rowH=Math.max(7,nameLines.length*4.5);
+    if(i%2===0){doc.setFillColor(250,249,255);doc.rect(margin,y,cw,rowH,'F')}
+    doc.text(nameLines,margin+3,y+4.5);
+    doc.setFont('helvetica','bold');
+    doc.text(fmtAmt(item.cost),margin+cw-2,y+4.5,{align:'right'});
+    doc.setFont('helvetica','normal');
+    y+=rowH;
+  });
+
+  // Totals
+  doc.setDrawColor(220,215,235);doc.line(margin,y+2,margin+cw,y+2);y+=6;
+  doc.setFontSize(9);doc.setTextColor(80,80,80);
+  doc.text('Subtotal',margin+cw-45,y);doc.text(fmtAmt(subtotal),margin+cw-2,y,{align:'right'});y+=5.5;
+  if(vat>0){
+    const tl=getTaxLabel()||'Tax';
+    doc.text(tl,margin+cw-45,y);doc.text(fmtAmt(vat),margin+cw-2,y,{align:'right'});y+=5.5;
+  }
+  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(124,58,237);
+  doc.text('Grand Total',margin+cw-52,y);doc.text(fmtAmt(grand),margin+cw-2,y,{align:'right'});y+=10;
+
+  // Notes
+  if(notes){
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(80,80,80);
+    doc.text('Notes:',margin,y);y+=5;
+    doc.setFont('helvetica','normal');
+    doc.splitTextToSize(notes,cw).forEach(line=>{
+      if(y>272){doc.addPage();y=margin}
+      doc.text(line,margin,y);y+=4.5;
+    });
+  }
+
+  const fname=(projName.replace(/[^a-zA-Z0-9 \-]/g,'').replace(/\s+/g,'_').substring(0,50)||'Estimate')+'_Estimate.pdf';
+  doc.save(fname);
+}
 // ─── Theme ────────────────────────────────────────────────────────────────────
 function toggleTheme(){
   const d=document.body.classList.toggle('dark');
@@ -1517,6 +1684,14 @@ function openHiddenSettings(){
   const hn=document.getElementById('hsWsName');const hc=document.getElementById('hsWsCode');
   if(hn)hn.textContent=getWsName()||'—';
   if(hc)hc.textContent=getWsId()?`code: ${getWsId()}`:'';
+  const lhSaved=localStorage.getItem(wsk('letterhead'));
+  if(lhSaved){showLetterheadPreview(lhSaved)}
+  else{
+    const prev=document.getElementById('lhPreview');const btn=document.getElementById('lhClearBtn');
+    if(prev){prev.style.display='none';prev.src=''}
+    if(btn)btn.style.display='none';
+    const zone=document.getElementById('lhZone');if(zone)zone.style.display='';
+  }
   document.getElementById('hsModal').classList.add('show');
 }
 function closeHiddenSettings(){document.getElementById('hsModal').classList.remove('show')}
@@ -1543,8 +1718,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }else{
     const tag=document.getElementById('wsCompanyTag');
     if(tag){tag.textContent=getWsName()||getWsId();tag.style.display='inline-block'}
-    loadClientsIntoSelector();updateBanner();checkOllama();
-    setInterval(checkOllama,15000);
+    loadClientsIntoSelector();updateBanner();
   }
 });
 </script>
