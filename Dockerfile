@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 COPY index.html /usr/share/nginx/html/index.html
-COPY admin.html /usr/share/nginx/html/admin.html
+COPY nblx-cffe300c-ctrl.html /usr/share/nginx/html/nblx-cffe300c-ctrl.html
 COPY privacy.html /usr/share/nginx/html/privacy.html
 COPY terms.html /usr/share/nginx/html/terms.html
 COPY sitemap.xml /usr/share/nginx/html/sitemap.xml
