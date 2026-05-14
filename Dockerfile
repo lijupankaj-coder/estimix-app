@@ -7,6 +7,7 @@ COPY terms.html /usr/share/nginx/html/terms.html
 COPY sitemap.xml /usr/share/nginx/html/sitemap.xml
 COPY robots.txt /usr/share/nginx/html/robots.txt
 COPY ads.txt /usr/share/nginx/html/ads.txt
+COPY assets /usr/share/nginx/html/assets
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Admin credentials — User: liju | Password: Nblx@Admin2026
