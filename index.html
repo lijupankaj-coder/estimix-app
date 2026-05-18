@@ -9,7 +9,6 @@
 <meta name="author" content="Nebulix">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#7C3AED">
-<meta name="google-adsense-account" content="ca-pub-7384833188153383">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237C3AED'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial' font-size='26' font-weight='700' fill='white'%3EE%3C/text%3E%3C/svg%3E">
 <link rel="canonical" href="https://estimix.nebulixcloud.com/">
 
@@ -65,7 +64,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7384833188153383" crossorigin="anonymous"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="assets/index.css">
@@ -380,15 +378,15 @@
     </div>
     <div class="pw-body">
       <div class="pw-plans">
-        <div class="pw-plan" data-plan="monthly" onclick="selectPlan(this)">
-          <div class="pw-plan-name">Monthly</div>
+        <div class="pw-plan active" data-plan="pro" onclick="selectPlan(this)">
+          <div class="pw-plan-name">Pro</div>
           <div class="pw-plan-price">$9</div>
           <div class="pw-plan-desc">Single user · Unlimited estimates · billed monthly</div>
         </div>
-        <div class="pw-plan active" data-plan="yearly" onclick="selectPlan(this)">
-          <div class="pw-plan-name">Yearly</div>
-          <div class="pw-plan-price">$99</div>
-          <div class="pw-plan-desc">Single user · Unlimited estimates · billed yearly</div>
+        <div class="pw-plan" data-plan="team" onclick="selectPlan(this)">
+          <div class="pw-plan-name">Team</div>
+          <div class="pw-plan-price">$29</div>
+          <div class="pw-plan-desc">Up to 5 seats · Unlimited estimates · billed monthly</div>
         </div>
       </div>
       <label>Your email</label>
