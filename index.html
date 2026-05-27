@@ -486,13 +486,14 @@
   var API='https://nblx-cffe300c-platform.nebulixcloud.com/api/public';
   function getKeys(){var ek=typeof wsk==='function'?wsk('pro_email'):'estimix_pro_email';var pk=typeof wsk==='function'?wsk('pro_plan'):'estimix_pro_plan';return{ek:ek,pk:pk};}
   function unlock(email,plan){var k=getKeys();localStorage.setItem(k.ek,email);localStorage.setItem(k.pk,plan||'pro');if(typeof closePaywall==='function')closePaywall();setTimeout(function(){location.reload();},600);}
+  function goToCheckout(email){fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appSlug:SLUG,plan:'pro',email:email,successUrl:window.location.origin+'?payment=success',cancelUrl:window.location.href})}).then(function(r){return r.json();}).then(function(d){window.location.href=d.url||d.fallbackUrl;}).catch(function(){if(_ce)_ce();});}
   // Override checkEmailAccess to also try super admin API
   var _ce=window.checkEmailAccess;
   window.checkEmailAccess=async function(){
     var el=document.getElementById('pwAccessEmail');var email=el?el.value.trim().toLowerCase():'';
     if(!email||!email.includes('@')){if(_ce)_ce();return;}
-    try{var r=await fetch(API+'/validate-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,slug:SLUG}),signal:AbortSignal.timeout(4000)});var d=await r.json();if(d.valid){unlock(email,d.plan);return;}}catch(e){}
-    if(_ce)_ce();
+    try{var r=await fetch(API+'/validate-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,appSlug:SLUG}),signal:AbortSignal.timeout(4000)});var d=await r.json();if(d.valid){unlock(email,d.plan);return;}}catch(e){}
+    goToCheckout(email);
   };
   // Suite license key support
   window.activateLicenseKey=async function(){
