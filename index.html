@@ -505,6 +505,15 @@
       if(msg){msg.style.color='var(--red,#ef4444)';msg.textContent='Invalid or expired key.';}
     }catch(e){if(msg)msg.textContent='';}
   };
+  fetch('https://nblx-cffe300c-platform.nebulixcloud.com/api/public/pricing')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var app=d.apps.find(function(a){return a.slug==='estimix';});
+      if(!app)return;
+      var els=document.querySelectorAll('.pw-plan-price');
+      if(els[0])els[0].textContent='$'+app.proPrice;
+      if(els[1])els[1].textContent='$'+app.teamPrice;
+    }).catch(function(){});
 })();
 </script>
 </body>
