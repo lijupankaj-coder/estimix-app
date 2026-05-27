@@ -418,6 +418,12 @@
         <button class="btn-pw-pay" style="width:auto;padding:11px 18px;font-size:13px;white-space:nowrap" onclick="checkEmailAccess()">Check Access</button>
       </div>
       <div id="keyMsg"></div>
+      <div class="pw-divider" style="margin-top:16px">have a nebulix suite key?</div>
+      <div class="pw-email-row" style="margin-bottom:0">
+        <input type="text" id="pwLicKey" placeholder="NBX-SUITE-XXXX-XXXX-XXXX" autocomplete="off" style="font-family:'JetBrains Mono',monospace;letter-spacing:.04em;text-transform:uppercase">
+        <button class="btn-pw-pay" style="width:auto;padding:11px 18px;font-size:13px;white-space:nowrap" onclick="activateLicenseKey()">Activate</button>
+      </div>
+      <div id="suiteKeyMsg" style="font-size:12px;margin-top:6px;text-align:center;min-height:16px"></div>
       <div style="text-align:center;margin-top:16px">
         <button onclick="closePaywall()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline">Maybe later</button>
       </div>
@@ -474,5 +480,31 @@
 </div>
 
 <script src="assets/index.js"></script>
+<script>
+(function(){
+  var SLUG='estimix';
+  var API='https://nblx-cffe300c-platform.nebulixcloud.com/api/public';
+  function getKeys(){var ek=typeof wsk==='function'?wsk('pro_email'):'estimix_pro_email';var pk=typeof wsk==='function'?wsk('pro_plan'):'estimix_pro_plan';return{ek:ek,pk:pk};}
+  function unlock(email,plan){var k=getKeys();localStorage.setItem(k.ek,email);localStorage.setItem(k.pk,plan||'pro');if(typeof closePaywall==='function')closePaywall();setTimeout(function(){location.reload();},600);}
+  // Override checkEmailAccess to also try super admin API
+  var _ce=window.checkEmailAccess;
+  window.checkEmailAccess=async function(){
+    var el=document.getElementById('pwAccessEmail');var email=el?el.value.trim().toLowerCase():'';
+    if(!email||!email.includes('@')){if(_ce)_ce();return;}
+    try{var r=await fetch(API+'/validate-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,slug:SLUG}),signal:AbortSignal.timeout(4000)});var d=await r.json();if(d.valid){unlock(email,d.plan);return;}}catch(e){}
+    if(_ce)_ce();
+  };
+  // Suite license key support
+  window.activateLicenseKey=async function(){
+    var kEl=document.getElementById('pwLicKey');var key=kEl?kEl.value.trim().toUpperCase():'';
+    if(!key)return;
+    var msg=document.getElementById('suiteKeyMsg');if(msg)msg.textContent='Validating…';
+    try{var r=await fetch(API+'/validate-license',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key}),signal:AbortSignal.timeout(4000)});var d=await r.json();
+      if(d.valid){if(msg){msg.style.color='var(--green,#22c55e)';msg.textContent='✓ Suite access activated!';}unlock(d.email||key,d.plan);return;}
+      if(msg){msg.style.color='var(--red,#ef4444)';msg.textContent='Invalid or expired key.';}
+    }catch(e){if(msg)msg.textContent='';}
+  };
+})();
+</script>
 </body>
 </html>
