@@ -486,6 +486,7 @@
   var API='https://nblx-cffe300c-platform.nebulixcloud.com/api/public';
   function getKeys(){var ek=typeof wsk==='function'?wsk('pro_email'):'estimix_pro_email';var pk=typeof wsk==='function'?wsk('pro_plan'):'estimix_pro_plan';return{ek:ek,pk:pk};}
   function unlock(email,plan){var k=getKeys();localStorage.setItem(k.ek,email);localStorage.setItem(k.pk,plan||'pro');if(typeof closePaywall==='function')closePaywall();setTimeout(function(){location.reload();},600);}
+  if(new URLSearchParams(window.location.search).get('payment')==='success'){window.history.replaceState({},'',window.location.pathname);setTimeout(function(){if(typeof showPaywall==='function')showPaywall();var el=document.getElementById('pwAccessEmail');if(el){el.placeholder='Enter your payment email to unlock';el.focus();}var note=document.querySelector('.pw-note');if(note){note.style.color='#16a34a';note.innerHTML='✓ Payment received! Enter your email above to unlock.';}},500);}
   function goToCheckout(email){fetch(API+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appSlug:SLUG,plan:'pro',email:email,successUrl:window.location.origin+'?payment=success',cancelUrl:window.location.href})}).then(function(r){return r.json();}).then(function(d){window.location.href=d.url||d.fallbackUrl;}).catch(function(){if(_ce)_ce();});}
   // Override checkEmailAccess to also try super admin API
   var _ce=window.checkEmailAccess;
